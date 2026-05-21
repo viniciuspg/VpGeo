@@ -61,9 +61,9 @@
 </head>
 <body>
     <div class="header">
-        <h1>&#127963;&#65039; SICG — Leaflet + GeoServer IPHAN</h1>
+        <h1>VpGeo — Patrimônio Cultural</h1>
         <div class="badges">
-            <span class="badge badge-v">v1.0 — PWA</span>
+            <span class="badge badge-v">v1.0</span>
             <span class="badge badge-proto">Protótipo</span>
         </div>
     </div>
@@ -78,10 +78,10 @@
     <div class="mobile-coords" id="mobileCoords">Lat: -15.00 | Lng: -50.00 | Z: 5</div>
     <div class="note-panel" id="notePanel">
         <button class="close-btn" onclick="document.getElementById('notePanel').style.display='none'">&#10005;</button>
-        <strong>&#9432; SICG — Prova de conceito</strong><br>
-        <strong>&#128205; Clique no mapa</strong> para consultar feições.<br>
-        <strong>&#127919; GPS:</strong> botão &#9678; localiza você no mapa.<br>
-        <strong>&#128506;&#65039;</strong> Legenda e camadas nos cantos.
+        <strong>VpGeo</strong><br>
+        Clique no mapa para consultar feições.<br>
+        Botão GPS localiza você no mapa.<br>
+        Legenda e camadas nos cantos.
     </div>
     <div class="legend-panel" id="legendPanel">
         <h3>&#128506;&#65039; Legenda <button class="close-btn" onclick="toggleLegend()">&#10005;</button></h3>
@@ -231,19 +231,12 @@
         };
         zB.addTo(map);
     </script>
-    <!-- Banner HTTPS -->
-    <div id="httpsBanner" style="display:none; background:#fff3cd; color:#856404; padding:8px 16px; font-size:12px; line-height:1.4; border-bottom:2px solid #ffc107; position:fixed; top:0; left:0; right:0; z-index:9999; text-align:center;">
-        <strong>&#9888;&#65039; Versão online (GitHub Pages):</strong>
-        As camadas WMS do GeoServer IPHAN não são exibidas nesta versão por incompatibilidade HTTPS/HTTP do servidor.
-        Para visualizar todas as 13 camadas, <strong>baixe o repositório</strong> e abra o arquivo localmente no navegador.
-        <button onclick="document.getElementById('httpsBanner').style.display='none'" style="margin-left:12px; background:#856404; color:white; border:none; border-radius:4px; padding:2px 8px; cursor:pointer; font-size:11px;">Fechar</button>
+    <div id="httpsBanner" style="display:none;background:#fff3cd;color:#856404;padding:8px 16px;font-size:12px;line-height:1.4;border-bottom:2px solid #ffc107;position:fixed;top:0;left:0;right:0;z-index:9999;text-align:center;">
+        <b>Versão online (GitHub Pages):</b> As camadas WMS do GeoServer IPHAN não são exibidas por incompatibilidade HTTPS/HTTP do servidor. Para visualizar todas as 13 camadas, <b>baixe o repositório</b> e abra localmente no navegador.
+        <button onclick="document.getElementById('httpsBanner').style.display='none'" style="margin-left:12px;background:#856404;color:white;border:none;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:11px;">Fechar</button>
     </div>
     <script>
-        // Detecta se está em HTTPS (GitHub Pages) e mostra aviso
-        if (window.location.protocol === 'https:') {
-            document.getElementById('httpsBanner').style.display = 'block';
-        }
-        // Service Worker PWA
+        if (window.location.protocol === 'https:') { document.getElementById('httpsBanner').style.display = 'block'; }
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js')
                 .then(function(reg) { console.log('[PWA] SW registrado:', reg.scope); })
