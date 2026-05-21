@@ -2,7 +2,6 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VpGeo — Patrimônio Cultural Brasileiro</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -86,11 +85,11 @@
     </div>
     <div class="legend-panel" id="legendPanel">
         <h3>&#128506;&#65039; Legenda <button class="close-btn" onclick="toggleLegend()">&#10005;</button></h3>
-        <div class="legend-item"><div class="legend-item-title">Sítios Arqueológicos (pontos)</div><img src="https://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios" onerror="this.style.display='none'"></div>
-        <div class="legend-item"><div class="legend-item-title">Sítios Arqueológicos (polígonos)</div><img src="https://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios_pol" onerror="this.style.display='none'"></div>
-        <div class="legend-item"><div class="legend-item-title">Bens Materiais</div><img src="https://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_bem_classificacao" onerror="this.style.display='none'"></div>
-        <div class="legend-item"><div class="legend-item-title">Bens Materiais — Polígonos</div><img src="https://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:bem_poligono" onerror="this.style.display='none'"></div>
-        <div class="legend-item"><div class="legend-item-title">Hidrografia</div><img src="https://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_hidrografia" onerror="this.style.display='none'"></div>
+        <div class="legend-item"><div class="legend-item-title">Sítios Arqueológicos (pontos)</div><img src="http://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios" onerror="this.style.display='none'"></div>
+        <div class="legend-item"><div class="legend-item-title">Sítios Arqueológicos (polígonos)</div><img src="http://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios_pol" onerror="this.style.display='none'"></div>
+        <div class="legend-item"><div class="legend-item-title">Bens Materiais</div><img src="http://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_bem_classificacao" onerror="this.style.display='none'"></div>
+        <div class="legend-item"><div class="legend-item-title">Bens Materiais — Polígonos</div><img src="http://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:bem_poligono" onerror="this.style.display='none'"></div>
+        <div class="legend-item"><div class="legend-item-title">Hidrografia</div><img src="http://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_hidrografia" onerror="this.style.display='none'"></div>
     </div>
     <button class="legend-toggle" id="legendToggle" onclick="toggleLegend()">&#128506;&#65039; Legenda</button>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -102,7 +101,7 @@
         }
         if (window.innerWidth <= 768) { setTimeout(function(){ var n=document.getElementById('notePanel'); if(n) n.style.display='none'; }, 5000); }
 
-        var WMS_URL = 'https://portal.iphan.gov.br/geoserver/SICG/wms';
+        var WMS_URL = 'http://portal.iphan.gov.br/geoserver/SICG/wms';
         var map = L.map('map', { center: [-15.0, -50.0], zoom: 5, maxZoom: 19, zoomControl: true });
 
         var esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19, maxNativeZoom: 18 });
@@ -232,7 +231,19 @@
         };
         zB.addTo(map);
     </script>
+    <!-- Banner HTTPS -->
+    <div id="httpsBanner" style="display:none; background:#fff3cd; color:#856404; padding:8px 16px; font-size:12px; line-height:1.4; border-bottom:2px solid #ffc107; position:fixed; top:0; left:0; right:0; z-index:9999; text-align:center;">
+        <strong>&#9888;&#65039; Versão online (GitHub Pages):</strong>
+        As camadas WMS do GeoServer IPHAN não são exibidas nesta versão por incompatibilidade HTTPS/HTTP do servidor.
+        Para visualizar todas as 13 camadas, <strong>baixe o repositório</strong> e abra o arquivo localmente no navegador.
+        <button onclick="document.getElementById('httpsBanner').style.display='none'" style="margin-left:12px; background:#856404; color:white; border:none; border-radius:4px; padding:2px 8px; cursor:pointer; font-size:11px;">Fechar</button>
+    </div>
     <script>
+        // Detecta se está em HTTPS (GitHub Pages) e mostra aviso
+        if (window.location.protocol === 'https:') {
+            document.getElementById('httpsBanner').style.display = 'block';
+        }
+        // Service Worker PWA
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js')
                 .then(function(reg) { console.log('[PWA] SW registrado:', reg.scope); })
