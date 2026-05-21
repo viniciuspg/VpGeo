@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VpGeo — Patrimônio Cultural Brasileiro</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -85,11 +86,11 @@
     </div>
     <div class="legend-panel" id="legendPanel">
         <h3>&#128506;&#65039; Legenda <button class="close-btn" onclick="toggleLegend()">&#10005;</button></h3>
-        <div class="legend-item"><div class="legend-item-title">Sítios Arqueológicos (pontos)</div><img src="http://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios" onerror="this.style.display='none'"></div>
-        <div class="legend-item"><div class="legend-item-title">Sítios Arqueológicos (polígonos)</div><img src="http://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios_pol" onerror="this.style.display='none'"></div>
-        <div class="legend-item"><div class="legend-item-title">Bens Materiais</div><img src="http://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_bem_classificacao" onerror="this.style.display='none'"></div>
-        <div class="legend-item"><div class="legend-item-title">Bens Materiais — Polígonos</div><img src="http://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:bem_poligono" onerror="this.style.display='none'"></div>
-        <div class="legend-item"><div class="legend-item-title">Hidrografia</div><img src="http://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_hidrografia" onerror="this.style.display='none'"></div>
+        <div class="legend-item"><div class="legend-item-title">Sítios Arqueológicos (pontos)</div><img src="https://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios" onerror="this.style.display='none'"></div>
+        <div class="legend-item"><div class="legend-item-title">Sítios Arqueológicos (polígonos)</div><img src="https://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios_pol" onerror="this.style.display='none'"></div>
+        <div class="legend-item"><div class="legend-item-title">Bens Materiais</div><img src="https://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_bem_classificacao" onerror="this.style.display='none'"></div>
+        <div class="legend-item"><div class="legend-item-title">Bens Materiais — Polígonos</div><img src="https://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:bem_poligono" onerror="this.style.display='none'"></div>
+        <div class="legend-item"><div class="legend-item-title">Hidrografia</div><img src="https://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_hidrografia" onerror="this.style.display='none'"></div>
     </div>
     <button class="legend-toggle" id="legendToggle" onclick="toggleLegend()">&#128506;&#65039; Legenda</button>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -101,7 +102,7 @@
         }
         if (window.innerWidth <= 768) { setTimeout(function(){ var n=document.getElementById('notePanel'); if(n) n.style.display='none'; }, 5000); }
 
-        var WMS_URL = 'http://portal.iphan.gov.br/geoserver/SICG/wms';
+        var WMS_URL = 'https://portal.iphan.gov.br/geoserver/SICG/wms';
         var map = L.map('map', { center: [-15.0, -50.0], zoom: 5, maxZoom: 19, zoomControl: true });
 
         var esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19, maxNativeZoom: 18 });
