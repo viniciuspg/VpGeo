@@ -76,13 +76,7 @@
     </div>
     <div id="map"></div>
     <div class="mobile-coords" id="mobileCoords">Lat: -15.00 | Lng: -50.00 | Z: 5</div>
-    <div class="note-panel" id="notePanel">
-        <button class="close-btn" onclick="document.getElementById('notePanel').style.display='none'">&#10005;</button>
-        <strong>VpGeo</strong><br>
-        Clique no mapa para consultar feições.<br>
-        Botão GPS localiza você no mapa.<br>
-        Legenda e camadas nos cantos.
-    </div>
+    
     <div class="legend-panel" id="legendPanel">
         <h3>&#128506;&#65039; Legenda <button class="close-btn" onclick="toggleLegend()">&#10005;</button></h3>
         <div class="legend-item"><div class="legend-item-title">Sítios Arqueológicos (pontos)</div><img src="http://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios" onerror="this.style.display='none'"></div>
@@ -99,7 +93,6 @@
             if (p.style.display === 'none' || p.style.display === '') { p.style.display = 'block'; b.style.display = 'none'; }
             else { p.style.display = 'none'; b.style.display = 'block'; }
         }
-        if (window.innerWidth <= 768) { setTimeout(function(){ var n=document.getElementById('notePanel'); if(n) n.style.display='none'; }, 5000); }
 
         var WMS_URL = 'http://portal.iphan.gov.br/geoserver/SICG/wms';
         var map = L.map('map', { center: [-15.0, -50.0], zoom: 5, maxZoom: 19, zoomControl: true });
