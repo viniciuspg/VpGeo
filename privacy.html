@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VpGeo — Política de Privacidade</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f5f5; color: #333; }
+        .header { background: linear-gradient(135deg, #5a0a0a, #8b1a1a); color: white; padding: 16px 24px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .header h1 { font-size: 20px; font-weight: 600; }
+        .header p { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+        .content { max-width: 800px; margin: 20px auto; padding: 24px; background: white; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); line-height: 1.7; }
+        h2 { color: #5a0a0a; font-size: 18px; margin-top: 24px; margin-bottom: 8px; border-bottom: 2px solid #5a0a0a; padding-bottom: 4px; }
+        h3 { color: #8b1a1a; font-size: 15px; margin-top: 16px; margin-bottom: 6px; }
+        p, li { font-size: 14px; margin-bottom: 8px; }
+        ul { padding-left: 24px; margin-bottom: 12px; }
+        li { margin-bottom: 4px; }
+        .highlight { background: #fef3f3; border-left: 3px solid #5a0a0a; padding: 10px 14px; margin: 12px 0; border-radius: 4px; font-size: 13px; }
+        .footer { text-align: center; padding: 20px; font-size: 11px; color: #999; }
+        .footer a { color: #5a0a0a; text-decoration: none; }
+        .back-link { display: inline-block; margin-top: 20px; padding: 8px 16px; background: #5a0a0a; color: white; border-radius: 6px; text-decoration: none; font-size: 13px; }
+        .back-link:hover { background: #8b1a1a; }
+        @media (max-width: 768px) {
+            .content { margin: 10px; padding: 16px; }
+            .header h1 { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>VpGeo &#8212; Politica de Privacidade</h1>
+        <p>Ultima atualizacao: Maio de 2026</p>
+    </div>
+    <div class="content">
+        <h2>1. Sobre o VpGeo</h2>
+        <p>O <strong>VpGeo</strong> e um aplicativo web (PWA) gratuito para visualizacao de dados geoespaciais sobre o patrimonio cultural brasileiro, utilizando dados publicos do <strong>Instituto do Patrimonio Historico e Artistico Nacional (IPHAN)</strong>.</p>
+        <p><strong>Desenvolvedor:</strong> Vinicius Paiva Goncalves</p>
+
+        <h2>2. Dados coletados</h2>
+
+        <h3>2.1 Dados de localizacao (GPS)</h3>
+        <p>O VpGeo pode acessar sua localizacao geografica <strong>apenas quando voce ativa o botao GPS</strong>. Esses dados:</p>
+        <ul>
+            <li>Sao usados exclusivamente para exibir sua posicao no mapa</li>
+            <li><strong>Nao sao armazenados</strong> em nenhum servidor</li>
+            <li><strong>Nao sao compartilhados</strong> com terceiros</li>
+            <li>Permanecem apenas no seu dispositivo durante a sessao</li>
+        </ul>
+        <div class="highlight">Voce pode desativar o GPS a qualquer momento clicando novamente no botao de localizacao.</div>
+
+        <h3>2.2 Cookies de anuncios (Google AdSense)</h3>
+        <p>A versao com anuncios do VpGeo utiliza o <strong>Google AdSense</strong> para exibir banners publicitarios. O Google AdSense pode utilizar cookies para:</p>
+        <ul>
+            <li>Personalizar anuncios com base nos seus interesses</li>
+            <li>Medir o desempenho dos anuncios</li>
+            <li>Limitar a frequencia de exibicao de anuncios</li>
+        </ul>
+        <p>Para mais informacoes sobre como o Google usa cookies, visite: <a href="https://policies.google.com/technologies/ads" target="_blank">Politica de Privacidade do Google Ads</a>.</p>
+        <div class="highlight">Voce pode gerenciar suas preferencias de anuncios em: <a href="https://adssettings.google.com" target="_blank">adssettings.google.com</a></div>
+
+        <h3>2.3 Dados de navegacao</h3>
+        <p>O VpGeo nao coleta dados de navegacao ativamente. No entanto, os servicos de hospedagem (GitHub Pages) podem registrar informacoes padrao de acesso, como endereco IP e tipo de navegador, conforme suas proprias politicas de privacidade.</p>
+
+        <h2>3. Dados NAO coletados</h2>
+        <p>O VpGeo <strong>nao coleta</strong>:</p>
+        <ul>
+            <li>Nome, email ou informacoes pessoais</li>
+            <li>Nao exige cadastro ou criacao de conta</li>
+            <li>Nao armazena historico de busca ou navegacao</li>
+            <li>Nao rastreia movimentacao do usuario</li>
+        </ul>
+
+        <h2>4. Servicos de terceiros</h2>
+        <p>O VpGeo utiliza os seguintes servicos de terceiros:</p>
+        <ul>
+            <li><strong>IPHAN GeoServer</strong> — camadas WMS de patrimonio cultural (dados publicos)</li>
+            <li><strong>Google AdSense</strong> — exibicao de anuncios (versao com anuncios)</li>
+            <li><strong>Esri ArcGIS</strong> — mapas base (satelite, topografico, ruas)</li>
+            <li><strong>OpenStreetMap</strong> — mapa base colaborativo</li>
+            <li><strong>Cloudflare Workers</strong> — proxy HTTPS para acesso seguro ao GeoServer</li>
+            <li><strong>GitHub Pages</strong> — hospedagem do aplicativo</li>
+        </ul>
+        <p>Cada servico possui sua propria politica de privacidade e termos de uso.</p>
+
+        <h2>5. Seus direitos</h2>
+        <p>Voce tem total controle sobre seus dados:</p>
+        <ul>
+            <li><strong>GPS:</strong> Pode ativar ou desativar a qualquer momento pelo botao no app ou pelas configuracoes do seu dispositivo</li>
+            <li><strong>Cookies:</strong> Pode bloquear ou apagar cookies nas configuracoes do seu navegador</li>
+            <li><strong>Anuncios personalizados:</strong> Pode desativar em <a href="https://adssettings.google.com" target="_blank">adssettings.google.com</a></li>
+        </ul>
+
+        <h2>6. Seguranca</h2>
+        <p>O VpGeo utiliza conexao <strong>HTTPS</strong> para proteger a comunicacao entre seu dispositivo e os servidores. Nenhum dado pessoal e armazenado pelo aplicativo.</p>
+
+        <h2>7. Publico-alvo</h2>
+        <p>O VpGeo nao e direcionado a menores de 13 anos e nao coleta intencionalmente dados de criancas.</p>
+
+        <h2>8. Alteracoes nesta politica</h2>
+        <p>Esta politica pode ser atualizada periodicamente. A data da ultima atualizacao sera sempre exibida no topo desta pagina.</p>
+
+        <h2>9. Contato</h2>
+        <p>Em caso de duvidas sobre esta politica de privacidade, entre em contato:</p>
+        <div class="highlight">
+            <strong>Desenvolvedor:</strong> Vinicius Paiva Goncalves<br>
+            <strong>Email:</strong> viniciuspg@outlook.com<br>
+            <strong>Localizacao:</strong> Florianopolis, Santa Catarina, Brasil
+        </div>
+
+        <a href="index.html" class="back-link">&#8592; Voltar ao VpGeo</a>
+    </div>
+    <div class="footer">
+        <p>&copy; 2026 VpGeo — Patrimonio Cultural Brasileiro | <a href="index.html">Pagina principal</a></p>
+    </div>
+</body>
+</html>
