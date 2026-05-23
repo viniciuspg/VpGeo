@@ -10,7 +10,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         .header { background: linear-gradient(135deg, #5a0a0a, #8b1a1a); color: white; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 1001; }
         .header h1 { font-size: 15px; font-weight: 600; }
         .header .badges { display: flex; gap: 6px; }
@@ -22,7 +22,7 @@
         .info-bar .info-left { display: flex; gap: 10px; align-items: center; }
         .wms-status { display: flex; align-items: center; gap: 3px; font-size: 10px; }
         .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; background: #4caf50; }
-        #map { flex: 1; width: 100%; }
+        #map { flex: 1; width: 100%; padding-bottom: env(safe-area-inset-bottom, 0px); }
         .leaflet-control-layers { border-radius: 8px !important; box-shadow: 0 2px 12px rgba(0,0,0,0.15) !important; max-height: 80vh; overflow-y: auto; font-size: 12px; }
         .leaflet-control-layers-separator { border-top: 2px solid #5a0a0a !important; margin: 4px 0 !important; }
         .leaflet-popup-content-wrapper { border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
@@ -41,7 +41,7 @@
         .legend-item img { display: block; max-width: 200px; }
         .legend-toggle { position: absolute; bottom: 30px; left: 10px; background: white; border: 2px solid rgba(0,0,0,0.2); border-radius: 6px; padding: 5px 8px; font-size: 11px; cursor: pointer; z-index: 998; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
         .legend-toggle:hover { background: #f0f0f0; }
-        .mobile-coords { display: none; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: white; padding: 2px 10px; border-radius: 12px; font-family: Consolas, monospace; font-size: 9px; z-index: 998; white-space: nowrap; pointer-events: none; }
+        .mobile-coords { display: none; position: absolute; bottom: 47px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: white; padding: 2px 10px; border-radius: 12px; font-family: Consolas, monospace; font-size: 9px; z-index: 400; white-space: nowrap; pointer-events: none; }
         .gps-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; font-size: 18px; text-decoration: none; background: white; color: #333; cursor: pointer; transition: all 0.2s; }
         .gps-btn:hover { background: #f4f4f4; }
         .gps-btn.active { background: #1565c0; color: white; }
@@ -53,6 +53,7 @@
         @media (max-width: 768px) {
             .header { padding: 6px 10px; } .header h1 { font-size: 12px; } .header .badges { display: none; }
             .info-bar { display: none; } .mobile-coords { display: block; }
+			.leaflet-bottom { bottom: 5px !important; }
             .legend-panel { left: 6px; right: 6px; bottom: 24px; max-width: none; max-height: 40vh; }
             .legend-toggle { bottom: 24px; left: 6px; font-size: 10px; padding: 4px 6px; }
             .leaflet-control-layers { max-height: 70vh; font-size: 11px; }
@@ -75,7 +76,7 @@
         <div class="coords" id="coords">Lat: -15.0000 | Lng: -50.0000 | Zoom: 5</div>
     </div>
     <div id="map"></div>
-    <div class="mobile-coords" id="mobileCoords">Lat: -15.00 | Lng: -50.00 | Z: 5</div>
+    <div class="mobile-coords" id="mobileCoords">Lat: -15.00 | Lng: -50.00 | Zoom: 5</div>
     <div class="legend-panel" id="legendPanel">
         <h3>Legenda <button class="close-btn" onclick="toggleLegend()">&#10005;</button></h3>
         <div id="legendContent"></div>
@@ -98,22 +99,16 @@
 
         function px(url) { return useProxy ? PROXY + encodeURIComponent(url) : url; }
 
-        // Custom WMS layer that routes tiles through proxy on HTTPS
         L.TileLayer.WMSProxy = L.TileLayer.WMS.extend({
             getTileUrl: function(coords) {
                 var url = L.TileLayer.WMS.prototype.getTileUrl.call(this, coords);
-                if (useProxy) {
-                    return PROXY + encodeURIComponent(url);
-                }
+                if (useProxy) { return PROXY + encodeURIComponent(url); }
                 return url;
             }
         });
 
-        function wmsProxy(baseUrl, opts) {
-            return new L.TileLayer.WMSProxy(baseUrl, opts);
-        }
+        function wmsProxy(baseUrl, opts) { return new L.TileLayer.WMSProxy(baseUrl, opts); }
 
-        // Build legend with proxy-aware URLs
         var legendEntries = [
             { title: 'S\u00edtios Arqueol\u00f3gicos (pontos)', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios' },
             { title: 'S\u00edtios Arqueol\u00f3gicos (pol\u00edgonos)', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios_pol' },
@@ -171,7 +166,7 @@
             var z = map.getZoom();
             var d = document.getElementById('coords'), m = document.getElementById('mobileCoords');
             if (d) d.textContent = 'Lat: ' + lat.toFixed(6) + ' | Lng: ' + lng.toFixed(6) + ' | Zoom: ' + z;
-            if (m) m.textContent = 'Lat: ' + lat.toFixed(4) + ' | Lng: ' + lng.toFixed(4) + ' | Z: ' + z;
+            if (m) m.textContent = 'Lat: ' + lat.toFixed(4) + ' | Lng: ' + lng.toFixed(4) + ' | Zoom: ' + z;
         }
         map.on('mousemove', function(e) { updateCoords(e.latlng.lat, e.latlng.lng); });
         map.on('zoomend moveend', function() { var c = map.getCenter(); updateCoords(c.lat, c.lng); });
@@ -301,7 +296,6 @@
         };
         zB.addTo(map);
 
-        // Console log
         console.log('[VpGeo v1.4] Proxy: ' + (useProxy ? 'ATIVO (HTTPS)' : 'DESATIVADO (local)'));
     </script>
     <script>
