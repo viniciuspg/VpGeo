@@ -63,7 +63,7 @@
     <div class="header">
         <h1>VpGeo &#8212; Patrim&#244;nio Cultural</h1>
         <div class="badges">
-            <span class="badge badge-v">v1.3</span>
+            <span class="badge badge-v">v1.4</span>
             <span class="badge badge-proto">Prot&#243;tipo</span>
         </div>
     </div>
@@ -78,12 +78,7 @@
     <div class="mobile-coords" id="mobileCoords">Lat: -15.00 | Lng: -50.00 | Z: 5</div>
     <div class="legend-panel" id="legendPanel">
         <h3>Legenda <button class="close-btn" onclick="toggleLegend()">&#10005;</button></h3>
-        <div class="legend-item"><div class="legend-item-title">S&#237;tios Arqueol&#243;gicos (pontos)</div><img src="http://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios" onerror="this.style.display='none'"></div>
-        <div class="legend-item"><div class="legend-item-title">S&#237;tios Arqueol&#243;gicos (pol&#237;gonos)</div><img src="http://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios_pol" onerror="this.style.display='none'"></div>
-        <div class="legend-item"><div class="legend-item-title">Bens Materiais</div><img src="http://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_bem_classificacao" onerror="this.style.display='none'"></div>
-        <div class="legend-item"><div class="legend-item-title">Bens Materiais &#8212; Pol&#237;gonos</div><img src="http://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:bem_poligono" onerror="this.style.display='none'"></div>
-        <div class="legend-item"><div class="legend-item-title">Hidrografia</div><img src="http://portal.iphan.gov.br/geoserver/SICG/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_hidrografia" onerror="this.style.display='none'"></div>
-        <div class="legend-item"><div class="legend-item-title">Empreendimentos (FCA)</div><img src="http://portal.iphan.gov.br/geoserver/DBGEO/wms?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=Empreendimentos" onerror="this.style.display='none'"></div>
+        <div id="legendContent"></div>
     </div>
     <button class="legend-toggle" id="legendToggle" onclick="toggleLegend()">Legenda</button>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -94,8 +89,44 @@
             else { p.style.display = 'none'; b.style.display = 'block'; }
         }
 
-        var WMS_URL = 'http://portal.iphan.gov.br/geoserver/SICG/wms';
-        var WMS_DBGEO = 'http://portal.iphan.gov.br/geoserver/DBGEO/wms';
+        // === PROXY CONFIG ===
+        var PROXY = 'https://iphan-proxy.viniciuspg.workers.dev/?url=';
+        var useProxy = (window.location.protocol === 'https:');
+
+        var WMS_SICG_RAW = 'http://portal.iphan.gov.br/geoserver/SICG/wms';
+        var WMS_DBGEO_RAW = 'http://portal.iphan.gov.br/geoserver/DBGEO/wms';
+
+        function px(url) { return useProxy ? PROXY + encodeURIComponent(url) : url; }
+
+        // Custom WMS layer that routes tiles through proxy on HTTPS
+        L.TileLayer.WMSProxy = L.TileLayer.WMS.extend({
+            getTileUrl: function(coords) {
+                var url = L.TileLayer.WMS.prototype.getTileUrl.call(this, coords);
+                if (useProxy) {
+                    return PROXY + encodeURIComponent(url);
+                }
+                return url;
+            }
+        });
+
+        function wmsProxy(baseUrl, opts) {
+            return new L.TileLayer.WMSProxy(baseUrl, opts);
+        }
+
+        // Build legend with proxy-aware URLs
+        var legendEntries = [
+            { title: 'S\u00edtios Arqueol\u00f3gicos (pontos)', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios' },
+            { title: 'S\u00edtios Arqueol\u00f3gicos (pol\u00edgonos)', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios_pol' },
+            { title: 'Bens Materiais', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_bem_classificacao' },
+            { title: 'Bens Materiais \u2014 Pol\u00edgonos', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:bem_poligono' },
+            { title: 'Hidrografia', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_hidrografia' },
+            { title: 'Empreendimentos (FCA)', url: WMS_DBGEO_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=Empreendimentos' }
+        ];
+        var lc = document.getElementById('legendContent');
+        legendEntries.forEach(function(e) {
+            lc.innerHTML += '<div class="legend-item"><div class="legend-item-title">' + e.title + '</div><img src="' + px(e.url) + '" onerror="this.style.display=\'none\'"></div>';
+        });
+
         var map = L.map('map', { center: [-15.0, -50.0], zoom: 5, maxZoom: 19, zoomControl: true });
 
         var esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19, maxNativeZoom: 18 });
@@ -107,24 +138,18 @@
         var esriLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, opacity: 0.9 });
         esriLabels.addTo(map);
 
-        function wms(layer, style) {
-            var o = { layers: layer, format: 'image/png', transparent: true, version: '1.1.1', maxZoom: 19, attribution: 'IPHAN/SICG' };
-            if (style) o.styles = style;
-            return L.tileLayer.wms(WMS_URL, o);
+        function wms(baseUrl, layer, style) {
+            return wmsProxy(baseUrl, { layers: layer, styles: style || '', format: 'image/png', transparent: true, version: '1.1.1', maxZoom: 19, attribution: 'IPHAN' });
         }
 
-        var sitP = wms('SICG:sitios','SICG:Tipo_Bem'), sitPol = wms('SICG:sitios_pol','SICG:Tipo_Bem_pol');
-        var benM = wms('SICG:tg_bem_classificacao','SICG:Tipo_Bem'), benPr = wms('SICG:Bem_Protecao','SICG:Tipo_Bem');
-        var benPol = wms('SICG:bem_poligono','SICG:Tipo_Bem_pol');
-        var acSalv = wms('SICG:tg_acao','SICG:acao'), benIm = wms('SICG:tg_bem_imaterial','SICG:acao');
-        var ctxIm = wms('SICG:ctx_imediato','polygon'), mun = wms('SICG:municipio','polygon');
-        var preSt = wms('SICG:tg_pre_setor','polygon'), hidro = wms('SICG:tg_hidrografia','SICG:hidrografia_sicg');
-        var nim81 = wms('SICG:Mapa_Nimuendaju_1981_IBGE','raster'), nim17 = wms('SICG:Mapa_Nimuendaju_IPHAN_2017','raster');
-
-        var empreend = L.tileLayer.wms(WMS_DBGEO, {
-            layers: 'DBGEO:Empreendimentos', styles: 'DBGEO:fca',
-            format: 'image/png', transparent: true, version: '1.1.1', maxZoom: 19, attribution: 'IPHAN/DBGEO'
-        });
+        var sitP = wms(WMS_SICG_RAW,'SICG:sitios','SICG:Tipo_Bem'), sitPol = wms(WMS_SICG_RAW,'SICG:sitios_pol','SICG:Tipo_Bem_pol');
+        var benM = wms(WMS_SICG_RAW,'SICG:tg_bem_classificacao','SICG:Tipo_Bem'), benPr = wms(WMS_SICG_RAW,'SICG:Bem_Protecao','SICG:Tipo_Bem');
+        var benPol = wms(WMS_SICG_RAW,'SICG:bem_poligono','SICG:Tipo_Bem_pol');
+        var acSalv = wms(WMS_SICG_RAW,'SICG:tg_acao','SICG:acao'), benIm = wms(WMS_SICG_RAW,'SICG:tg_bem_imaterial','SICG:acao');
+        var ctxIm = wms(WMS_SICG_RAW,'SICG:ctx_imediato','polygon'), mun = wms(WMS_SICG_RAW,'SICG:municipio','polygon');
+        var preSt = wms(WMS_SICG_RAW,'SICG:tg_pre_setor','polygon'), hidro = wms(WMS_SICG_RAW,'SICG:tg_hidrografia','SICG:hidrografia_sicg');
+        var nim81 = wms(WMS_SICG_RAW,'SICG:Mapa_Nimuendaju_1981_IBGE','raster'), nim17 = wms(WMS_SICG_RAW,'SICG:Mapa_Nimuendaju_IPHAN_2017','raster');
+        var empreend = wmsProxy(WMS_DBGEO_RAW, { layers:'DBGEO:Empreendimentos', styles:'DBGEO:fca', format:'image/png', transparent:true, version:'1.1.1', maxZoom:19, attribution:'IPHAN/DBGEO' });
 
         sitP.addTo(map); sitPol.addTo(map);
 
@@ -165,14 +190,10 @@
         };
         GpsCtrl.addTo(map);
 
-        // Compass heading
         function onOrientation(e) {
             var heading;
-            if (e.webkitCompassHeading !== undefined) {
-                heading = e.webkitCompassHeading; // iOS
-            } else if (e.alpha !== null) {
-                heading = (360 - e.alpha); // Android
-            }
+            if (e.webkitCompassHeading !== undefined) { heading = e.webkitCompassHeading; }
+            else if (e.alpha !== null) { heading = (360 - e.alpha); }
             if (heading !== undefined && !isNaN(heading)) {
                 currentHeading = heading;
                 var arrow = document.getElementById('gpsArrow');
@@ -184,17 +205,11 @@
             if (compassActive) return;
             if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                 DeviceOrientationEvent.requestPermission().then(function(state) {
-                    if (state === 'granted') {
-                        window.addEventListener('deviceorientation', onOrientation, true);
-                        compassActive = true;
-                    }
-                }).catch(function(err) { console.log('Compass permission error:', err); });
+                    if (state === 'granted') { window.addEventListener('deviceorientation', onOrientation, true); compassActive = true; }
+                }).catch(function(err) { console.log('Compass error:', err); });
             } else if (window.DeviceOrientationEvent) {
-                if ('ondeviceorientationabsolute' in window) {
-                    window.addEventListener('deviceorientationabsolute', onOrientation, true);
-                } else {
-                    window.addEventListener('deviceorientation', onOrientation, true);
-                }
+                if ('ondeviceorientationabsolute' in window) { window.addEventListener('deviceorientationabsolute', onOrientation, true); }
+                else { window.addEventListener('deviceorientation', onOrientation, true); }
                 compassActive = true;
             }
         }
@@ -213,12 +228,7 @@
                 if (gpsMk) { gpsMk.setLatLng([la,lo]); gpsCi.setLatLng([la,lo]).setRadius(ac); }
                 else {
                     gpsMk = L.marker([la,lo], {
-                        icon: L.divIcon({
-                            html: '<div class="gps-marker-wrap" id="gpsArrow"><div class="gps-arrow"></div><div class="gps-dot"></div></div>',
-                            iconSize: [20, 36],
-                            iconAnchor: [10, 36],
-                            className: ''
-                        }),
+                        icon: L.divIcon({ html:'<div class="gps-marker-wrap" id="gpsArrow"><div class="gps-arrow"></div><div class="gps-dot"></div></div>', iconSize:[20,36], iconAnchor:[10,36], className:'' }),
                         zIndexOffset: 9999
                     }).addTo(map);
                     gpsCi = L.circle([la,lo], { radius:ac, color:'#1565c0', fillColor:'#1565c0', fillOpacity:0.1, weight:1 }).addTo(map);
@@ -239,9 +249,8 @@
             stopCompass();
         }
 
-        // GetFeatureInfo - variaveis globais
-        var lastGfiSICG = '';
-        var lastGfiDBGEO = '';
+        // === GetFeatureInfo ===
+        var lastGfiSICG = '', lastGfiDBGEO = '';
         function openGfiSICG() { if (lastGfiSICG) window.open(lastGfiSICG, '_blank'); }
         function openGfiDBGEO() { if (lastGfiDBGEO) window.open(lastGfiDBGEO, '_blank'); }
 
@@ -256,8 +265,11 @@
             var lSICG = 'SICG:sitios,SICG:sitios_pol,SICG:tg_bem_classificacao,SICG:bem_poligono';
             var lDBGEO = 'DBGEO:Empreendimentos';
 
-            lastGfiSICG = WMS_URL + '?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&QUERY_LAYERS=' + lSICG + '&LAYERS=' + lSICG + common;
-            lastGfiDBGEO = WMS_DBGEO + '?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&QUERY_LAYERS=' + lDBGEO + '&LAYERS=' + lDBGEO + common;
+            var rawSICG = WMS_SICG_RAW + '?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&QUERY_LAYERS=' + lSICG + '&LAYERS=' + lSICG + common;
+            var rawDBGEO = WMS_DBGEO_RAW + '?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&QUERY_LAYERS=' + lDBGEO + '&LAYERS=' + lDBGEO + common;
+
+            lastGfiSICG = useProxy ? PROXY + encodeURIComponent(rawSICG) : rawSICG;
+            lastGfiDBGEO = useProxy ? PROXY + encodeURIComponent(rawDBGEO) : rawDBGEO;
 
             L.popup({ maxWidth: 300 }).setLatLng(e.latlng).setContent(
                 '<div style="min-width:220px;">' +
@@ -265,7 +277,7 @@
                 '<div class="gfi-coords">Lat: ' + e.latlng.lat.toFixed(6) + ' | Lng: ' + e.latlng.lng.toFixed(6) + '</div>' +
                 '<button class="gfi-btn gfi-btn-sicg" onclick="openGfiSICG()">SICG: Sitios e Bens</button>' +
                 '<button class="gfi-btn gfi-btn-dbgeo" onclick="openGfiDBGEO()">DBGEO: Empreendimentos (FCA)</button>' +
-                '<div class="gfi-note">Abre em nova aba (restricao do servidor WMS).</div>' +
+                '<div class="gfi-note">Abre em nova aba.</div>' +
                 '</div>'
             ).openOn(map);
         });
@@ -288,13 +300,11 @@
             L.DomEvent.disableClickPropagation(d); return d;
         };
         zB.addTo(map);
+
+        // Console log
+        console.log('[VpGeo v1.4] Proxy: ' + (useProxy ? 'ATIVO (HTTPS)' : 'DESATIVADO (local)'));
     </script>
-    <div id="httpsBanner" style="display:none;background:#fff3cd;color:#856404;padding:8px 16px;font-size:12px;line-height:1.4;border-bottom:2px solid #ffc107;position:fixed;top:0;left:0;right:0;z-index:9999;text-align:center;">
-        <b>Versao online (GitHub Pages):</b> As camadas WMS do GeoServer IPHAN nao sao exibidas por incompatibilidade HTTPS/HTTP. Para visualizar, <b>baixe o repositorio</b> e abra localmente.
-        <button onclick="document.getElementById('httpsBanner').style.display='none'" style="margin-left:12px;background:#856404;color:white;border:none;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:11px;">Fechar</button>
-    </div>
     <script>
-        if (window.location.protocol === 'https:') { document.getElementById('httpsBanner').style.display = 'block'; }
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js')
                 .then(function(reg) { console.log('[PWA] SW registrado:', reg.scope); })
