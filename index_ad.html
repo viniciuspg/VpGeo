@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VpGeo — Patrimônio Cultural Brasileiro</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#5a0a0a">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        .header { background: linear-gradient(135deg, #5a0a0a, #8b1a1a); color: white; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 1001; }
+        .header h1 { font-size: 15px; font-weight: 600; }
+        .header .badges { display: flex; gap: 6px; }
+        .header .badge { padding: 2px 8px; border-radius: 10px; font-size: 9px; font-weight: 700; text-transform: uppercase; }
+        .badge-proto { background: #ffc107; color: #333; }
+        .badge-v { background: #4caf50; color: #fff; }
+        .info-bar { background: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 4px 16px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #555; z-index: 1000; }
+        .info-bar .coords { font-family: Consolas, monospace; background: #e9ecef; padding: 2px 8px; border-radius: 4px; font-size: 10px; }
+        .info-bar .info-left { display: flex; gap: 10px; align-items: center; }
+        .wms-status { display: flex; align-items: center; gap: 3px; font-size: 10px; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; background: #4caf50; }
+        .ad-banner { background: #f0f0f0; text-align: center; padding: 4px 0; font-size: 10px; color: #999; border-bottom: 1px solid #ddd; min-height: 50px; display: flex; align-items: center; justify-content: center; }
+        .ad-banner span { background: #e0e0e0; padding: 8px 20px; border-radius: 4px; font-family: Consolas, monospace; letter-spacing: 1px; }
+        #map { flex: 1; width: 100%; padding-bottom: env(safe-area-inset-bottom, 0px); }
+        .leaflet-control-layers { border-radius: 8px !important; box-shadow: 0 2px 12px rgba(0,0,0,0.15) !important; max-height: 80vh; overflow-y: auto; font-size: 12px; }
+        .leaflet-control-layers-separator { border-top: 2px solid #5a0a0a !important; margin: 4px 0 !important; }
+        .leaflet-popup-content-wrapper { border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+        .gfi-btn { display: block; width: 100%; padding: 8px 12px; margin: 4px 0; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; }
+        .gfi-btn:hover { opacity: 0.85; }
+        .gfi-btn-sicg { background: #5a0a0a; }
+        .gfi-btn-dbgeo { background: #1565c0; }
+        .gfi-coords { font-family: Consolas, monospace; font-size: 10px; color: #666; background: #f5f5f5; padding: 3px 6px; border-radius: 4px; text-align: center; margin-bottom: 4px; }
+        .gfi-note { font-size: 9px; color: #999; line-height: 1.3; margin-top: 4px; padding-top: 4px; border-top: 1px solid #eee; }
+        .legend-panel { position: absolute; bottom: 30px; left: 10px; background: rgba(255,255,255,0.96); padding: 8px 12px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); z-index: 999; max-width: 240px; max-height: 350px; overflow-y: auto; font-size: 11px; border-left: 3px solid #5a0a0a; display: none; }
+        .legend-panel h3 { font-size: 12px; color: #5a0a0a; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .legend-panel .close-btn { cursor: pointer; font-size: 16px; color: #999; background: none; border: none; line-height: 1; }
+        .legend-panel .close-btn:hover { color: #333; }
+        .legend-item { margin-bottom: 6px; }
+        .legend-item-title { font-weight: 600; font-size: 10px; color: #333; margin-bottom: 1px; }
+        .legend-item img { display: block; max-width: 200px; }
+        .legend-toggle { position: absolute; bottom: 30px; left: 10px; background: white; border: 2px solid rgba(0,0,0,0.2); border-radius: 6px; padding: 5px 8px; font-size: 11px; cursor: pointer; z-index: 998; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+        .legend-toggle:hover { background: #f0f0f0; }
+        .mobile-coords { display: none; position: absolute; bottom: 47px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: white; padding: 2px 10px; border-radius: 12px; font-family: Consolas, monospace; font-size: 9px; z-index: 400; white-space: nowrap; pointer-events: none; }
+        .gps-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; font-size: 18px; text-decoration: none; background: white; color: #333; cursor: pointer; transition: all 0.2s; }
+        .gps-btn:hover { background: #f4f4f4; }
+        .gps-btn.active { background: #1565c0 !important; color: white !important; border-radius: 4px; }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+        .gps-marker-wrap { position: relative; width: 20px; height: 36px; transition: transform 0.15s ease-out; }
+        .gps-arrow { width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 16px solid #1565c0; position: absolute; top: 0; left: 3px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
+        .gps-dot { width: 14px; height: 14px; background: #1565c0; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 6px rgba(21,101,192,0.5); position: absolute; bottom: 0; left: 3px; }
+        .gps-dot::after { content: ''; position: absolute; top: -2px; left: -2px; width: 14px; height: 14px; border-radius: 50%; background: rgba(21,101,192,0.3); animation: pulse 1.5s ease-out infinite; }
+        @media (max-width: 768px) {
+            .header { padding: 6px 10px; } .header h1 { font-size: 12px; } .header .badges { display: none; }
+            .info-bar { display: none; } .mobile-coords { display: block; }
+			.leaflet-bottom { bottom: 5px !important; }
+            .legend-panel { left: 6px; right: 6px; bottom: 24px; max-width: none; max-height: 40vh; }
+            .legend-toggle { bottom: 24px; left: 6px; font-size: 10px; padding: 4px 6px; }
+            .leaflet-control-layers { max-height: 70vh; font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>VpGeo &#8212; Patrim&#244;nio Cultural</h1>
+        <div class="badges">
+            <span class="badge badge-v">v1.4</span>
+            <span class="badge badge-proto">Prot&#243;tipo</span>
+        </div>
+    </div>
+    <div class="info-bar">
+        <div class="info-left">
+            <span class="wms-status"><span class="status-dot"></span> WMS: portal.iphan.gov.br</span>
+            <span class="wms-status"><span class="status-dot"></span> 14 camadas | Clique para consultar</span>
+        </div>
+        <div class="coords" id="coords">Lat: -15.0000 | Lng: -50.0000 | Zoom: 5</div>
+    </div>
+    <div class="ad-banner"><span>ESPACO PARA ANUNCIO - Google AdSense</span></div>
+    <div id="map"></div>
+    <div class="mobile-coords" id="mobileCoords">Lat: -15.00 | Lng: -50.00 | Zoom: 5</div>
+    <div class="legend-panel" id="legendPanel">
+        <h3>Legenda <button class="close-btn" onclick="toggleLegend()">&#10005;</button></h3>
+        <div id="legendContent"></div>
+    </div>
+    <button class="legend-toggle" id="legendToggle" onclick="toggleLegend()">Legenda</button>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        function toggleLegend() {
+            var p = document.getElementById('legendPanel'), b = document.getElementById('legendToggle');
+            if (p.style.display === 'none' || p.style.display === '') { p.style.display = 'block'; b.style.display = 'none'; }
+            else { p.style.display = 'none'; b.style.display = 'block'; }
+        }
+
+        // === PROXY CONFIG ===
+        var PROXY = 'https://iphan-proxy.viniciuspg.workers.dev/?url=';
+        var useProxy = (window.location.protocol === 'https:');
+
+        var WMS_SICG_RAW = 'http://portal.iphan.gov.br/geoserver/SICG/wms';
+        var WMS_DBGEO_RAW = 'http://portal.iphan.gov.br/geoserver/DBGEO/wms';
+
+        function px(url) { return useProxy ? PROXY + encodeURIComponent(url) : url; }
+
+        L.TileLayer.WMSProxy = L.TileLayer.WMS.extend({
+            getTileUrl: function(coords) {
+                var url = L.TileLayer.WMS.prototype.getTileUrl.call(this, coords);
+                if (useProxy) { return PROXY + encodeURIComponent(url); }
+                return url;
+            }
+        });
+
+        function wmsProxy(baseUrl, opts) { return new L.TileLayer.WMSProxy(baseUrl, opts); }
+
+        var legendEntries = [
+            { title: 'S\u00edtios Arqueol\u00f3gicos (pontos)', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios' },
+            { title: 'S\u00edtios Arqueol\u00f3gicos (pol\u00edgonos)', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios_pol' },
+            { title: 'Bens Materiais', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_bem_classificacao' },
+            { title: 'Bens Materiais \u2014 Pol\u00edgonos', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:bem_poligono' },
+            { title: 'Hidrografia', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_hidrografia' },
+            { title: 'Empreendimentos (FCA)', url: WMS_DBGEO_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=Empreendimentos' }
+        ];
+        var lc = document.getElementById('legendContent');
+        legendEntries.forEach(function(e) {
+            lc.innerHTML += '<div class="legend-item"><div class="legend-item-title">' + e.title + '</div><img src="' + px(e.url) + '" onerror="this.style.display=\'none\'"></div>';
+        });
+
+        var map = L.map('map', { center: [-15.0, -50.0], zoom: 5, maxZoom: 19, zoomControl: true });
+
+        var esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19, maxNativeZoom: 18 });
+        var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap', maxZoom: 19, maxNativeZoom: 18 });
+        var esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19, maxNativeZoom: 18 });
+        var esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19, maxNativeZoom: 18 });
+        esriSat.addTo(map);
+
+        var esriLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, opacity: 0.9 });
+        esriLabels.addTo(map);
+
+        function wms(baseUrl, layer, style) {
+            return wmsProxy(baseUrl, { layers: layer, styles: style || '', format: 'image/png', transparent: true, version: '1.1.1', maxZoom: 19, attribution: 'IPHAN' });
+        }
+
+        var sitP = wms(WMS_SICG_RAW,'SICG:sitios','SICG:Tipo_Bem'), sitPol = wms(WMS_SICG_RAW,'SICG:sitios_pol','SICG:Tipo_Bem_pol');
+        var benM = wms(WMS_SICG_RAW,'SICG:tg_bem_classificacao','SICG:Tipo_Bem'), benPr = wms(WMS_SICG_RAW,'SICG:Bem_Protecao','SICG:Tipo_Bem');
+        var benPol = wms(WMS_SICG_RAW,'SICG:bem_poligono','SICG:Tipo_Bem_pol');
+        var acSalv = wms(WMS_SICG_RAW,'SICG:tg_acao','SICG:acao'), benIm = wms(WMS_SICG_RAW,'SICG:tg_bem_imaterial','SICG:acao');
+        var ctxIm = wms(WMS_SICG_RAW,'SICG:ctx_imediato','polygon'), mun = wms(WMS_SICG_RAW,'SICG:municipio','polygon');
+        var preSt = wms(WMS_SICG_RAW,'SICG:tg_pre_setor','polygon'), hidro = wms(WMS_SICG_RAW,'SICG:tg_hidrografia','SICG:hidrografia_sicg');
+        var nim81 = wms(WMS_SICG_RAW,'SICG:Mapa_Nimuendaju_1981_IBGE','raster'), nim17 = wms(WMS_SICG_RAW,'SICG:Mapa_Nimuendaju_IPHAN_2017','raster');
+        var empreend = wmsProxy(WMS_DBGEO_RAW, { layers:'DBGEO:Empreendimentos', styles:'DBGEO:fca', format:'image/png', transparent:true, version:'1.1.1', maxZoom:19, attribution:'IPHAN/DBGEO' });
+
+        sitP.addTo(map); sitPol.addTo(map);
+
+        L.control.layers(
+            { "Satelite": esriSat, "OpenStreetMap": osm, "Topografico": esriTopo, "Ruas": esriStreet },
+            { "Rotulos": esriLabels,
+              "Sitios (pontos)": sitP, "Sitios (poligonos)": sitPol,
+              "Bens Materiais": benM, "Protecao": benPr, "Bens Mat. (pol.)": benPol,
+              "Acoes Salvaguarda": acSalv, "Bens Imateriais": benIm,
+              "Contexto Imediato": ctxIm, "Municipios": mun, "Pre Setor": preSt,
+              "Hidrografia": hidro, "Nimuendaju 1981": nim81, "Nimuendaju 2017": nim17,
+              "Empreendimentos (FCA)": empreend },
+            { collapsed: true, position: 'topright' }
+        ).addTo(map);
+
+        L.control.scale({ metric: true, imperial: false, position: 'bottomright' }).addTo(map);
+
+        function updateCoords(lat, lng) {
+            var z = map.getZoom();
+            var d = document.getElementById('coords'), m = document.getElementById('mobileCoords');
+            if (d) d.textContent = 'Lat: ' + lat.toFixed(6) + ' | Lng: ' + lng.toFixed(6) + ' | Zoom: ' + z;
+            if (m) m.textContent = 'Lat: ' + lat.toFixed(4) + ' | Lng: ' + lng.toFixed(4) + ' | Zoom: ' + z;
+        }
+        map.on('mousemove', function(e) { updateCoords(e.latlng.lat, e.latlng.lng); });
+        map.on('zoomend moveend', function() { var c = map.getCenter(); updateCoords(c.lat, c.lng); });
+
+        // === GPS + COMPASS ===
+        var gpsOn = false, gpsWid = null, gpsMk = null, gpsCi = null;
+        var compassActive = false, currentHeading = 0;
+
+        var GpsCtrl = L.control({ position: 'topleft' });
+        GpsCtrl.onAdd = function() {
+            var d = L.DomUtil.create('div', 'leaflet-bar');
+            d.innerHTML = '<a href="#" id="gpsBtn" class="gps-btn" title="Minha localizacao">&#9678;</a>';
+            d.onclick = function(e) { e.preventDefault(); e.stopPropagation(); gpsOn ? stopGps() : startGps(); };
+            L.DomEvent.disableClickPropagation(d);
+            return d;
+        };
+        GpsCtrl.addTo(map);
+
+        function onOrientation(e) {
+            var heading;
+            if (e.webkitCompassHeading !== undefined) { heading = e.webkitCompassHeading; }
+            else if (e.alpha !== null) { heading = (360 - e.alpha); }
+            if (heading !== undefined && !isNaN(heading)) {
+                currentHeading = heading;
+                var arrow = document.getElementById('gpsArrow');
+                if (arrow) arrow.style.transform = 'rotate(' + Math.round(heading) + 'deg)';
+            }
+        }
+
+        function startCompass() {
+            if (compassActive) return;
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission().then(function(state) {
+                    if (state === 'granted') { window.addEventListener('deviceorientation', onOrientation, true); compassActive = true; }
+                }).catch(function(err) { console.log('Compass error:', err); });
+            } else if (window.DeviceOrientationEvent) {
+                if ('ondeviceorientationabsolute' in window) { window.addEventListener('deviceorientationabsolute', onOrientation, true); }
+                else { window.addEventListener('deviceorientation', onOrientation, true); }
+                compassActive = true;
+            }
+        }
+
+        function stopCompass() {
+            window.removeEventListener('deviceorientation', onOrientation, true);
+            window.removeEventListener('deviceorientationabsolute', onOrientation, true);
+            compassActive = false;
+        }
+
+        function startGps() {
+            if (!navigator.geolocation) { alert('Geolocalizacao nao suportada.'); return; }
+            gpsOn = true; document.getElementById('gpsBtn').classList.add('active');
+            gpsWid = navigator.geolocation.watchPosition(function(pos) {
+                var la = pos.coords.latitude, lo = pos.coords.longitude, ac = pos.coords.accuracy;
+                if (gpsMk) { gpsMk.setLatLng([la,lo]); gpsCi.setLatLng([la,lo]).setRadius(ac); }
+                else {
+                    gpsMk = L.marker([la,lo], {
+                        icon: L.divIcon({ html:'<div class="gps-marker-wrap" id="gpsArrow"><div class="gps-arrow"></div><div class="gps-dot"></div></div>', iconSize:[20,36], iconAnchor:[10,36], className:'' }),
+                        zIndexOffset: 9999
+                    }).addTo(map);
+                    gpsCi = L.circle([la,lo], { radius:ac, color:'#1565c0', fillColor:'#1565c0', fillOpacity:0.1, weight:1 }).addTo(map);
+                    map.setView([la,lo], 15);
+                    startCompass();
+                }
+                gpsMk.bindPopup('<strong>Voce esta aqui</strong><br><span style="font-size:11px;font-family:monospace;">Lat: '+la.toFixed(6)+'<br>Lng: '+lo.toFixed(6)+'<br>Precisao: +/-'+Math.round(ac)+' m<br>Direcao: '+Math.round(currentHeading)+'&deg;</span>');
+            }, function(err) {
+                stopGps();
+                alert(err.code===1?'Permissao negada.':err.code===2?'Localizacao indisponivel.':'Erro: '+err.message);
+            }, { enableHighAccuracy:true, timeout:15000, maximumAge:0 });
+        }
+        function stopGps() {
+            gpsOn = false; document.getElementById('gpsBtn').classList.remove('active');
+            if (gpsWid!==null) { navigator.geolocation.clearWatch(gpsWid); gpsWid=null; }
+            if (gpsMk) { map.removeLayer(gpsMk); gpsMk=null; }
+            if (gpsCi) { map.removeLayer(gpsCi); gpsCi=null; }
+            stopCompass();
+        }
+
+        // === GetFeatureInfo ===
+        var lastGfiSICG = '', lastGfiDBGEO = '';
+        function openGfiSICG() { if (lastGfiSICG) window.open(lastGfiSICG, '_blank'); }
+        function openGfiDBGEO() { if (lastGfiDBGEO) window.open(lastGfiDBGEO, '_blank'); }
+
+        map.on('click', function(e) {
+            var pt = map.latLngToContainerPoint(e.latlng);
+            var sz = map.getSize(), b = map.getBounds();
+            var bbox = b.getWest()+','+b.getSouth()+','+b.getEast()+','+b.getNorth();
+            var common = '&FORMAT=image/png&TRANSPARENT=true&INFO_FORMAT=text/html&FEATURE_COUNT=10' +
+                '&SRS=EPSG:4326&WIDTH=' + sz.x + '&HEIGHT=' + sz.y +
+                '&BBOX=' + bbox + '&X=' + Math.round(pt.x) + '&Y=' + Math.round(pt.y);
+
+            var lSICG = 'SICG:sitios,SICG:sitios_pol,SICG:tg_bem_classificacao,SICG:bem_poligono';
+            var lDBGEO = 'DBGEO:Empreendimentos';
+
+            var rawSICG = WMS_SICG_RAW + '?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&QUERY_LAYERS=' + lSICG + '&LAYERS=' + lSICG + common;
+            var rawDBGEO = WMS_DBGEO_RAW + '?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&QUERY_LAYERS=' + lDBGEO + '&LAYERS=' + lDBGEO + common;
+
+            lastGfiSICG = useProxy ? PROXY + encodeURIComponent(rawSICG) : rawSICG;
+            lastGfiDBGEO = useProxy ? PROXY + encodeURIComponent(rawDBGEO) : rawDBGEO;
+
+            L.popup({ maxWidth: 300 }).setLatLng(e.latlng).setContent(
+                '<div style="min-width:220px;">' +
+                '<div style="text-align:center;margin-bottom:6px;"><strong style="color:#5a0a0a;font-size:13px;">Consultar Feicao</strong></div>' +
+                '<div class="gfi-coords">Lat: ' + e.latlng.lat.toFixed(6) + ' | Lng: ' + e.latlng.lng.toFixed(6) + '</div>' +
+                '<button class="gfi-btn gfi-btn-sicg" onclick="openGfiSICG()">SICG: Sitios e Bens</button>' +
+                '<button class="gfi-btn gfi-btn-dbgeo" onclick="openGfiDBGEO()">DBGEO: Empreendimentos (FCA)</button>' +
+                '<div class="gfi-note">Abre em nova aba.</div>' +
+                '</div>'
+            ).openOn(map);
+        });
+
+        // Zoom buttons
+        var zF = L.control({position:'topleft'});
+        zF.onAdd = function() {
+            var d = L.DomUtil.create('div','leaflet-bar');
+            d.innerHTML = '<a href="#" title="Florianopolis" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:13px;text-decoration:none;background:white;font-weight:bold;">FLN</a>';
+            d.onclick = function(e) { e.preventDefault(); e.stopPropagation(); map.setView([-27.5954,-48.5480],12); };
+            L.DomEvent.disableClickPropagation(d); return d;
+        };
+        zF.addTo(map);
+
+        var zB = L.control({position:'topleft'});
+        zB.onAdd = function() {
+            var d = L.DomUtil.create('div','leaflet-bar');
+            d.innerHTML = '<a href="#" title="Brasil" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:13px;text-decoration:none;background:white;font-weight:bold;">BR</a>';
+            d.onclick = function(e) { e.preventDefault(); e.stopPropagation(); map.setView([-15.0,-50.0],5); };
+            L.DomEvent.disableClickPropagation(d); return d;
+        };
+        zB.addTo(map);
+
+        console.log('[VpGeo v1.4] Proxy: ' + (useProxy ? 'ATIVO (HTTPS)' : 'DESATIVADO (local)'));
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(function(reg) { console.log('[PWA] SW registrado:', reg.scope); })
+                .catch(function(err) { console.log('[PWA] Erro SW:', err); });
+        }
+    </script>
+</body>
+</html>
