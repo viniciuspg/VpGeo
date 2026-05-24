@@ -186,9 +186,9 @@
         function updateCoords(lat, lng) {
             var z = map.getZoom();
             var d = document.getElementById('coords'), m = document.getElementById('mobileCoords');
-            if (d) d.textContent = 'Lat: ' + lat.toFixed(8) + ' | Lng: ' + lng.toFixed(8) + ' | Zoom: ' + z;
+            if (d) d.textContent = 'Lat: ' + lat.toFixed(6) + ' | Lng: ' + lng.toFixed(6) + ' | Zoom: ' + z;
             var gpsAcc = (gpsOn && gpsMk) ? ' | \u00B1' + (gpsMk.getLatLng() ? Math.round(gpsCi.getRadius()) : '?') + 'm' : '';
-            if (m) m.textContent = 'Lat: ' + lat.toFixed(8) + ' | Lng: ' + lng.toFixed(8) + gpsAcc + ' | Zoom: ' + z;
+            if (m) m.textContent = 'Lat: ' + lat.toFixed(6) + ' | Lng: ' + lng.toFixed(6) + gpsAcc + ' | Zoom: ' + z;
         }
         map.on('mousemove', function(e) { updateCoords(e.latlng.lat, e.latlng.lng); });
         map.on('zoomend moveend', function() { var c = map.getCenter(); updateCoords(c.lat, c.lng); });
