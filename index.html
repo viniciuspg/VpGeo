@@ -82,7 +82,7 @@
     <div class="info-bar">
         <div class="info-left">
             <span class="wms-status"><span class="status-dot"></span> WMS: portal.iphan.gov.br</span>
-            <span class="wms-status"><span class="status-dot"></span> 14 camadas | Clique para consultar</span>
+            <span class="wms-status"><span class="status-dot"></span> 14 camadas | Clique no mapa para consultar</span>
         </div>
         <div class="coords" id="coords">Lat: -15.0000 | Lng: -50.0000 | Zoom: 5</div>
     </div>
@@ -121,8 +121,6 @@
         function wmsProxy(baseUrl, opts) { return new L.TileLayer.WMSProxy(baseUrl, opts); }
 
         var legendEntries = [
-            { title: 'S\u00edtios Arqueol\u00f3gicos (pontos)', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios' },
-            { title: 'S\u00edtios Arqueol\u00f3gicos (pol\u00edgonos)', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:sitios_pol' },
             { title: 'Bens Materiais', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_bem_classificacao' },
             { title: 'Bens Materiais \u2014 Pol\u00edgonos', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:bem_poligono' },
             { title: 'Hidrografia', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_hidrografia' },
@@ -140,7 +138,7 @@
         var esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19, maxNativeZoom: 18 });
         var esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19, maxNativeZoom: 18 });
         var gmrt = new L.TileLayer.WMSProxy('http://www.gmrt.org/services/mapserver/wms_merc?', {
-            layers: 'topo', format: 'image/png', transparent: false, version: '1.1.1',
+            layers: 'topo', format: 'image/jpeg', transparent: false, version: '1.1.1',
             maxZoom: 19, attribution: '<a href="https://www.gmrt.org" target="_blank">GMRT</a>/LDEO'
         });
 
