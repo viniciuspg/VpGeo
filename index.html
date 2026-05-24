@@ -140,7 +140,7 @@
         var esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19, maxNativeZoom: 18 });
         var esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19, maxNativeZoom: 18 });
         var gmrt = new L.TileLayer.WMSProxy('http://www.gmrt.org/services/mapserver/wms_merc?', {
-            layers: 'topo', format: 'image/jpeg', transparent: false, version: '1.1.1',
+            layers: 'topo', format: 'image/png', transparent: false, version: '1.1.1',
             maxZoom: 19, attribution: '<a href="https://www.gmrt.org" target="_blank">GMRT</a>/LDEO'
         });
 
