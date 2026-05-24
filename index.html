@@ -293,6 +293,12 @@
         function openGfiDBGEO() { if (lastGfiDBGEO) window.open(lastGfiDBGEO, '_blank'); }
 
         map.on('click', function(e) {
+			// Se painel de camadas aberto, fecha e nao abre GFI
+            if (layersExpanded) {
+                layersControl.classList.remove('leaflet-control-layers-expanded');
+                layersExpanded = false;
+                return;
+            }
             var pt = map.latLngToContainerPoint(e.latlng);
             var sz = map.getSize(), b = map.getBounds();
             var bbox = b.getWest()+','+b.getSouth()+','+b.getEast()+','+b.getNorth();
@@ -376,7 +382,35 @@
             L.DomEvent.disableClickPropagation(d); return d;
         };
         zB.addTo(map);
+// === Botao X no painel de camadas ===
+        var layersControl = document.querySelector('.leaflet-control-layers');
+        var layersExpanded = false;
 
+        function addCloseBtn() {
+            if (layersControl && !document.querySelector('.layers-close-btn')) {
+                var btn = document.createElement('button');
+                btn.className = 'layers-close-btn';
+                btn.innerHTML = '&#10005;';
+                btn.title = 'Fechar';
+                btn.onclick = function(e) {
+                    e.stopPropagation();
+                    layersControl.classList.remove('leaflet-control-layers-expanded');
+                    layersExpanded = false;
+                };
+                layersControl.querySelector('.leaflet-control-layers-list').prepend(btn);
+            }
+        }
+
+        var observer = new MutationObserver(function() {
+            var isOpen = layersControl.classList.contains('leaflet-control-layers-expanded');
+            if (isOpen && !layersExpanded) {
+                layersExpanded = true;
+                addCloseBtn();
+            } else if (!isOpen) {
+                layersExpanded = false;
+            }
+        });
+        observer.observe(layersControl, { attributes: true, attributeFilter: ['class'] });
         console.log('[VpGeo v1.4] Proxy: ' + (useProxy ? 'ATIVO (HTTPS)' : 'DESATIVADO (local)'));
     </script>
     <script>
