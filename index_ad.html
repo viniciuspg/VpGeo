@@ -8,6 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#5a0a0a">
     <link rel="apple-touch-icon" href="icon-192.png">
+	<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2432506794628052" crossorigin="anonymous"></script> -->
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
@@ -22,17 +23,8 @@
         .info-bar .info-left { display: flex; gap: 10px; align-items: center; }
         .wms-status { display: flex; align-items: center; gap: 3px; font-size: 10px; }
         .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; background: #4caf50; }
-        .gfi-card { background: #fafafa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; margin: 8px 0; }
-        .gfi-card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 2px solid; }
-        .gfi-field { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #f0f0f0; font-size: 11px; gap: 8px; }
-        .gfi-field:last-child { border-bottom: none; }
-        .gfi-label { font-weight: 700; font-size: 10px; text-transform: uppercase; min-width: 80px; flex-shrink: 0; }
-        .gfi-value { color: #333; text-align: right; word-break: break-word; }
-        .gfi-loading { text-align: center; padding: 12px; color: #888; font-size: 12px; }
-        .gfi-empty { text-align: center; padding: 10px; color: #999; font-size: 12px; font-style: italic; }
-        .gfi-section-title { font-size: 12px; font-weight: 700; margin: 8px 0 4px; padding: 4px 0; }
-        .gfi-fallback-btn { display: block; width: 100%; padding: 8px 12px; margin: 4px 0; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; }
-        .gfi-fallback-btn:hover { opacity: 0.85; }
+        .ad-banner { background: #f0f0f0; text-align: center; padding: 4px 0; font-size: 10px; color: #999; border-bottom: 1px solid #ddd; min-height: 50px; display: flex; align-items: center; justify-content: center; }
+        .ad-banner span { background: #e0e0e0; padding: 8px 20px; border-radius: 4px; font-family: Consolas, monospace; letter-spacing: 1px; }
         #map { flex: 1; width: 100%; padding-bottom: env(safe-area-inset-bottom, 0px); }
         .leaflet-control-layers { border-radius: 8px !important; box-shadow: 0 2px 12px rgba(0,0,0,0.15) !important; max-height: 80vh; overflow-y: auto; font-size: 12px; }
         .leaflet-control-layers-separator { border-top: 2px solid #5a0a0a !important; margin: 4px 0 !important; }
@@ -86,6 +78,7 @@
         </div>
         <div class="coords" id="coords">Lat: -15.0000 | Lng: -50.0000 | Zoom: 5</div>
     </div>
+    <div class="ad-banner"><span>ESPACO PARA ANUNCIO - Google AdSense</span></div>
     <div id="map"></div>
     <div class="mobile-coords" id="mobileCoords">Lat: -15.00 | Lng: -50.00 | Zoom: 5</div>
     <div class="legend-panel" id="legendPanel">
@@ -139,11 +132,6 @@
         var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap', maxZoom: 19, maxNativeZoom: 18 });
         var esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19, maxNativeZoom: 18 });
         var esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19, maxNativeZoom: 18 });
-        var gmrt = new L.TileLayer.WMSProxy('http://www.gmrt.org/services/mapserver/wms_merc?', {
-            layers: 'topo', format: 'image/jpeg', transparent: false, version: '1.1.1', tileSize: 512,
-            maxZoom: 19, attribution: '<a href="https://www.gmrt.org" target="_blank">GMRT</a>/LDEO'
-        });
-
         esriSat.addTo(map);
 
         var esriLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, opacity: 0.9 });
@@ -165,7 +153,7 @@
         sitP.addTo(map); sitPol.addTo(map);
 
         L.control.layers(
-            { "Satelite": esriSat, "OpenStreetMap": osm, "Topografico": esriTopo, "Ruas": esriStreet, "GMRT Topo": gmrt },
+            { "Satelite": esriSat, "OpenStreetMap": osm, "Topografico": esriTopo, "Ruas": esriStreet },
             { "Rotulos": esriLabels,
               "Sitios (pontos)": sitP, "Sitios (poligonos)": sitPol,
               "Bens Materiais": benM, "Protecao": benPr, "Bens Mat. (pol.)": benPol,
@@ -260,36 +248,7 @@
             stopCompass();
         }
 
-        // === GetFeatureInfo Inteligente ===
-        var skipFields = ['geom','the_geom','geometry','bbox','shape'];
-
-        function formatFeatures(data, color) {
-            if (!data || !data.features || data.features.length === 0) return '';
-            var h = '';
-            data.features.forEach(function(f) {
-                var layerName = (f.id || '').split('.')[0] || 'Feicao';
-                h += '<div class="gfi-card">';
-                h += '<div class="gfi-card-title" style="border-color:' + color + ';color:' + color + ';">' + layerName + '</div>';
-                var props = f.properties || {};
-                Object.keys(props).forEach(function(key) {
-                    if (skipFields.indexOf(key.toLowerCase()) >= 0) return;
-                    var val = props[key];
-                    if (val === null || val === undefined || val === '') return;
-                    h += '<div class="gfi-field"><span class="gfi-label" style="color:' + color + ';">' + key + '</span><span class="gfi-value">' + val + '</span></div>';
-                });
-                h += '</div>';
-            });
-            return h;
-        }
-
-        function buildGfiUrl(baseUrl, layers, bbox, sz, pt, fmt) {
-            return baseUrl + '?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo' +
-                '&QUERY_LAYERS=' + layers + '&LAYERS=' + layers +
-                '&INFO_FORMAT=' + fmt + '&FEATURE_COUNT=10&FORMAT=image/png&TRANSPARENT=true' +
-                '&SRS=EPSG:4326&WIDTH=' + sz.x + '&HEIGHT=' + sz.y +
-                '&BBOX=' + bbox + '&X=' + Math.round(pt.x) + '&Y=' + Math.round(pt.y);
-        }
-
+        // === GetFeatureInfo ===
         var lastGfiSICG = '', lastGfiDBGEO = '';
         function openGfiSICG() { if (lastGfiSICG) window.open(lastGfiSICG, '_blank'); }
         function openGfiDBGEO() { if (lastGfiDBGEO) window.open(lastGfiDBGEO, '_blank'); }
@@ -298,66 +257,28 @@
             var pt = map.latLngToContainerPoint(e.latlng);
             var sz = map.getSize(), b = map.getBounds();
             var bbox = b.getWest()+','+b.getSouth()+','+b.getEast()+','+b.getNorth();
+            var common = '&FORMAT=image/png&TRANSPARENT=true&INFO_FORMAT=text/html&FEATURE_COUNT=10' +
+                '&SRS=EPSG:4326&WIDTH=' + sz.x + '&HEIGHT=' + sz.y +
+                '&BBOX=' + bbox + '&X=' + Math.round(pt.x) + '&Y=' + Math.round(pt.y);
+
             var lSICG = 'SICG:sitios,SICG:sitios_pol,SICG:tg_bem_classificacao,SICG:bem_poligono';
             var lDBGEO = 'DBGEO:Empreendimentos';
 
-            var coordsHtml = '<div class="gfi-coords">Lat: ' + e.latlng.lat.toFixed(6) + ' | Lng: ' + e.latlng.lng.toFixed(6) + '</div>';
+            var rawSICG = WMS_SICG_RAW + '?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&QUERY_LAYERS=' + lSICG + '&LAYERS=' + lSICG + common;
+            var rawDBGEO = WMS_DBGEO_RAW + '?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&QUERY_LAYERS=' + lDBGEO + '&LAYERS=' + lDBGEO + common;
 
-            var jsonSICG = buildGfiUrl(WMS_SICG_RAW, lSICG, bbox, sz, pt, 'application/json');
-            var jsonDBGEO = buildGfiUrl(WMS_DBGEO_RAW, lDBGEO, bbox, sz, pt, 'application/json');
-            var htmlSICG = buildGfiUrl(WMS_SICG_RAW, lSICG, bbox, sz, pt, 'text/html');
-            var htmlDBGEO = buildGfiUrl(WMS_DBGEO_RAW, lDBGEO, bbox, sz, pt, 'text/html');
+            lastGfiSICG = useProxy ? PROXY + encodeURIComponent(rawSICG) : rawSICG;
+            lastGfiDBGEO = useProxy ? PROXY + encodeURIComponent(rawDBGEO) : rawDBGEO;
 
-            var fetchSICG = useProxy ? PROXY + encodeURIComponent(jsonSICG) : jsonSICG;
-            var fetchDBGEO = useProxy ? PROXY + encodeURIComponent(jsonDBGEO) : jsonDBGEO;
-            lastGfiSICG = useProxy ? PROXY + encodeURIComponent(htmlSICG) : htmlSICG;
-            lastGfiDBGEO = useProxy ? PROXY + encodeURIComponent(htmlDBGEO) : htmlDBGEO;
-
-            var popup = L.popup({ maxWidth: 340, maxHeight: 400 })
-                .setLatLng(e.latlng)
-                .setContent('<div style="min-width:240px;">' + coordsHtml + '<div class="gfi-loading">&#9683; Consultando...</div></div>')
-                .openOn(map);
-
-            Promise.all([
-                fetch(fetchSICG).then(function(r) { return r.json(); }).catch(function() { return null; }),
-                fetch(fetchDBGEO).then(function(r) { return r.json(); }).catch(function() { return null; })
-            ]).then(function(results) {
-                var sicgData = results[0], dbgeoData = results[1];
-				
-                // Se ambos falharam (CORS local), mostra botoes
-                if (sicgData === null && dbgeoData === null) {
-                    popup.setContent(
-                        '<div style="min-width:220px;">' + coordsHtml +
-                        '<button class="gfi-fallback-btn" style="background:#5a0a0a;" onclick="openGfiSICG()">SICG: Sitios e Bens</button>' +
-                        '<button class="gfi-fallback-btn" style="background:#1565c0;" onclick="openGfiDBGEO()">DBGEO: Empreendimentos (FCA)</button>' +
-                        '<div class="gfi-note">Abre em nova aba.</div></div>'
-                    );
-                    popup.update();
-                    return;
-                }
-                var sicgHtml = sicgData ? formatFeatures(sicgData, '#5a0a0a') : '';
-                var dbgeoHtml = dbgeoData ? formatFeatures(dbgeoData, '#1565c0') : '';
-                var hasSICG = sicgHtml.length > 0, hasDBGEO = dbgeoHtml.length > 0;
-
-                var content = '<div style="min-width:240px;">' + coordsHtml;
-                if (!hasSICG && !hasDBGEO) {
-                    content += '<div class="gfi-empty">Nenhuma feicao encontrada neste ponto.</div>';
-                } else {
-                    if (hasSICG) content += '<div class="gfi-section-title" style="color:#5a0a0a;">SICG \u2014 Sitios e Bens</div>' + sicgHtml;
-                    if (hasDBGEO) content += '<div class="gfi-section-title" style="color:#1565c0;">DBGEO \u2014 Empreendimentos</div>' + dbgeoHtml;
-                }
-                content += '</div>';
-                popup.setContent(content);
-                popup.update();
-            }).catch(function() {
-                popup.setContent(
-                    '<div style="min-width:220px;">' + coordsHtml +
-                    '<button class="gfi-fallback-btn" style="background:#5a0a0a;" onclick="openGfiSICG()">SICG: Sitios e Bens</button>' +
-                    '<button class="gfi-fallback-btn" style="background:#1565c0;" onclick="openGfiDBGEO()">DBGEO: Empreendimentos (FCA)</button>' +
-                    '<div class="gfi-note">Abre em nova aba.</div></div>'
-                );
-                popup.update();
-            });
+            L.popup({ maxWidth: 300 }).setLatLng(e.latlng).setContent(
+                '<div style="min-width:220px;">' +
+                '<div style="text-align:center;margin-bottom:6px;"><strong style="color:#5a0a0a;font-size:13px;">Consultar Feicao</strong></div>' +
+                '<div class="gfi-coords">Lat: ' + e.latlng.lat.toFixed(6) + ' | Lng: ' + e.latlng.lng.toFixed(6) + '</div>' +
+                '<button class="gfi-btn gfi-btn-sicg" onclick="openGfiSICG()">SICG: Sitios e Bens</button>' +
+                '<button class="gfi-btn gfi-btn-dbgeo" onclick="openGfiDBGEO()">DBGEO: Empreendimentos (FCA)</button>' +
+                '<div class="gfi-note">Abre em nova aba.</div>' +
+                '</div>'
+            ).openOn(map);
         });
 
         // Zoom buttons
