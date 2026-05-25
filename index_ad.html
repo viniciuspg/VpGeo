@@ -123,7 +123,7 @@
     </div>
     <div id="map"><div class="crosshair"></div></div>
 	<div class="search-panel" id="searchPanel">
-        <input class="search-input" id="searchInput" type="text" placeholder="Coordenadas ou endereco..." title="Ex: -27.57, -48.52 ou Florianopolis">
+        <input class="search-input" id="searchInput" type="text" placeholder="Coordenadas ou endereço..." title="Ex: -27.57, -48.52 ou Florianopolis">
         <button class="search-go" onclick="doSearch()">&#128269;</button>
         <div class="search-results" id="searchResults"></div>
     </div>
@@ -536,7 +536,7 @@
                 goToCoords(coords.lat, coords.lng);
                 return;
             }
-            // Busca por endereco via Nominatim
+            // Busca por endereço via Nominatim
             fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&q=' + encodeURIComponent(q))
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
