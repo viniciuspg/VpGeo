@@ -48,8 +48,9 @@
 		.report-send-btn:hover { background: #8b1a1a; }
 		.report-cancel-btn { background: #eee; color: #666; font-size: 12px; }
 		.report-cancel-btn:hover { background: #ddd; }
-        .search-box { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; gap: 0; }
-        .search-input { width: 220px; padding: 7px 10px; border: 2px solid rgba(0,0,0,0.2); border-right: none; border-radius: 6px 0 0 6px; font-size: 12px; font-family: inherit; outline: none; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+        .search-panel { position: absolute; top: 10px; right: 55px; z-index: 1001; display: none; flex-direction: row; gap: 0; }
+        .search-panel.open { display: flex; }
+        .search-input { width: 220px; padding: 7px 10px; border: 2px solid rgba(0,0,0,0.2); border-right: none; border-radius: 6px 0 0 6px; font-size: 12px; font-family: inherit; outline: none; box-shadow: 0 2px 6px rgba(0,0,0,0.15); background: white; }
         .search-input:focus { border-color: #5a0a0a; }
         .search-go { padding: 7px 10px; background: #5a0a0a; color: white; border: none; border-radius: 0 6px 6px 0; cursor: pointer; font-size: 13px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
         .search-go:hover { background: #8b1a1a; }
@@ -57,6 +58,7 @@
         .search-result-item { padding: 8px 10px; cursor: pointer; border-bottom: 1px solid #f0f0f0; }
         .search-result-item:hover { background: #fef3f3; }
         .search-result-item:last-child { border-bottom: none; }
+        @media (max-width: 768px) { .search-input { width: 160px; font-size: 11px; } .search-panel { right: 50px; top: 8px; } }
         @media (max-width: 768px) { .search-input { width: 180px; font-size: 11px; } }
         .crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 500; pointer-events: none; }
         .crosshair::before, .crosshair::after { content: ''; position: absolute; background: rgba(0,0,0,0.35); }
@@ -119,7 +121,7 @@
         <div class="coords" id="coords">Lat: -15.0000 | Lng: -50.0000 | Zoom: 5</div>
     </div>
     <div id="map"><div class="crosshair"></div></div>
-	<div class="search-box" id="searchBox">
+	<div class="search-panel" id="searchPanel">
         <input class="search-input" id="searchInput" type="text" placeholder="Coordenadas ou endereco..." title="Ex: -27.57, -48.52 ou Florianopolis">
         <button class="search-go" onclick="doSearch()">&#128269;</button>
         <div class="search-results" id="searchResults"></div>
@@ -470,6 +472,25 @@
         });
         observer.observe(layersControl, { attributes: true, attributeFilter: ['class'] });
         // === SEARCH BOX ===
+        var SearchCtrl = L.control({position:'topright'});
+        SearchCtrl.onAdd = function() {
+            var d = L.DomUtil.create('div','leaflet-bar');
+            d.innerHTML = '<a href="#" id="searchBtn" class="gps-btn" title="Buscar" style="font-size:16px;">&#128269;</a>';
+            d.onclick = function(e) { e.preventDefault(); e.stopPropagation(); toggleSearch(); };
+            L.DomEvent.disableClickPropagation(d);
+            return d;
+        };
+        SearchCtrl.addTo(map);
+
+        function toggleSearch() {
+            var p = document.getElementById('searchPanel');
+            if (p.classList.contains('open')) {
+                p.classList.remove('open');
+            } else {
+                p.classList.add('open');
+                document.getElementById('searchInput').focus();
+            }
+        }
         var searchMarker = null;
         document.getElementById('searchInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
 
@@ -530,7 +551,10 @@
 
         // Fecha resultados ao clicar fora
         document.addEventListener('click', function(e) {
-            if (!document.getElementById('searchBox').contains(e.target)) {
+            var panel = document.getElementById('searchPanel');
+            var btn = document.getElementById('searchBtn');
+            if (!panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+                panel.classList.remove('open');
                 document.getElementById('searchResults').style.display = 'none';
             }
         });
