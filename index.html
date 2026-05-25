@@ -8,6 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#5a0a0a">
     <link rel="apple-touch-icon" href="icon-192.png">
+	<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
@@ -129,7 +130,11 @@
     <div class="report-panel" id="reportPanel">
         <h3>Reportar Bem <button class="close-btn" onclick="closeReport()">&#10005;</button></h3>
         <div class="report-note"><strong>Bens acautelados em ambito federal (IPHAN):</strong><br>&#8226; <strong>Arqueologicos:</strong> Todos os sitios arqueologicos sao protegidos pela Uniao (Lei 3.924/1961), independentemente de estarem cadastrados.<br>&#8226; <strong>Tombados:</strong> Apenas bens tombados pelo IPHAN (nivel federal). Tombamentos estaduais ou municipais nao estao incluidos.<br>&#8226; <strong>Imateriais:</strong> Apenas bens registrados pelo IPHAN como patrimonio imaterial do Brasil.</div>
-        <label class="report-label">Tipo de bem:</label>
+        <label class="report-label">Seu nome:</label>
+        <input class="report-select" id="reportNome" type="text" placeholder="Nome completo">
+        <label class="report-label">Seu e-mail:</label>
+        <input class="report-select" id="reportEmail" type="email" placeholder="email@exemplo.com">
+		<label class="report-label">Tipo de bem:</label>
         <select class="report-select" id="reportType"><option value="">-- Selecione --</option><option value="Arqueologico">Arqueologico (sitio arqueologico)</option><option value="Tombado">Tombado (bem material federal)</option><option value="Imaterial">Imaterial (bem registrado federal)</option></select>
         <label class="report-label">Descricao do problema:</label>
         <textarea class="report-textarea" id="reportDesc" placeholder="Ex: Sitio nao cadastrado, localizacao incorreta, dados desatualizados..."></textarea>
@@ -438,10 +443,33 @@
         };
         ReportCtrl.addTo(map);
         function toggleReport(){var p=document.getElementById('reportPanel');if(p.style.display==='block'){closeReport();}else{p.style.display='block';document.getElementById('reportBtn').style.background='#ff9800';document.getElementById('reportBtn').style.color='white';}}
-        function closeReport(){document.getElementById('reportPanel').style.display='none';document.getElementById('reportBtn').style.background='';document.getElementById('reportBtn').style.color='';document.getElementById('reportMarkBtn').classList.remove('marking');document.getElementById('reportMarkBtn').innerHTML='&#128205; Marcar no mapa';document.getElementById('reportSendBtn').style.display='none';reportMode=false;if(reportMarker){map.removeLayer(reportMarker);reportMarker=null;}reportLat=null;reportLng=null;document.getElementById('reportCoords').textContent='Clique em "Marcar no mapa" para indicar a localizacao';document.getElementById('reportType').value='';document.getElementById('reportDesc').value='';}
+        function closeReport(){document.getElementById('reportPanel').style.display='none';document.getElementById('reportBtn').style.background='';document.getElementById('reportBtn').style.color='';document.getElementById('reportMarkBtn').classList.remove('marking');document.getElementById('reportMarkBtn').innerHTML='&#128205; Marcar no mapa';document.getElementById('reportSendBtn').style.display='none';reportMode=false;if(reportMarker){map.removeLayer(reportMarker);reportMarker=null;}reportLat=null;reportLng=null;document.getElementById('reportCoords').textContent='Clique em "Marcar no mapa" para indicar a localizacao';document.getElementById('reportNome').value='';document.getElementById('reportEmail').value='';document.getElementById('reportType').value='';document.getElementById('reportDesc').value='';}
         function startReportMark(){reportMode=true;document.getElementById('reportMarkBtn').classList.add('marking');document.getElementById('reportMarkBtn').innerHTML='&#128205; Clique no mapa...';document.getElementById('reportPanel').style.display='none';}
         function placeReportMarker(ll){reportLat=ll.lat;reportLng=ll.lng;if(reportMarker)map.removeLayer(reportMarker);reportMarker=L.marker([reportLat,reportLng],{icon:L.divIcon({html:'<div style="background:#ff9800;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,0.3);border:2px solid white;">!</div>',iconSize:[24,24],iconAnchor:[12,12],className:''})}).addTo(map);reportMode=false;document.getElementById('reportPanel').style.display='block';document.getElementById('reportMarkBtn').classList.remove('marking');document.getElementById('reportMarkBtn').innerHTML='&#128205; Remarcar no mapa';document.getElementById('reportCoords').textContent='Lat: '+reportLat.toFixed(6)+' | Lng: '+reportLng.toFixed(6);document.getElementById('reportSendBtn').style.display='block';}
-        function sendReport(){var t=document.getElementById('reportType').value,d=document.getElementById('reportDesc').value;if(!t){alert('Selecione o tipo de bem.');return;}if(!d.trim()){alert('Descreva o problema.');return;}if(reportLat===null){alert('Marque a localizacao no mapa.');return;}var now=new Date(),ds=now.toLocaleDateString('pt-BR')+' '+now.toLocaleTimeString('pt-BR');var subj='[VpGeo Report] Bem '+t;var body='REPORT VpGeo - Bem Acautelado Federal%0A=================================%0A%0ATipo: '+t+'%0ACoordenadas: '+reportLat.toFixed(6)+', '+reportLng.toFixed(6)+'%0AData/Hora: '+ds+'%0A%0ADescricao:%0A'+encodeURIComponent(d)+'%0A%0A=================================%0AEnviado pelo VpGeo (https://viniciuspg.github.io/VpGeo/)';window.open('mailto:viniciuspg@gmail.com?subject='+encodeURIComponent(subj)+'&body='+body,'_self');closeReport();}
+        function sendReport(){
+            var t=document.getElementById('reportType').value;
+            var d=document.getElementById('reportDesc').value;
+            var n=document.getElementById('reportNome').value;
+            var em=document.getElementById('reportEmail').value;
+            if(!n.trim()){alert('Informe seu nome.');return;}
+            if(!em.trim()||em.indexOf('@')<0){alert('Informe um e-mail valido.');return;}
+            if(!t){alert('Selecione o tipo de bem.');return;}
+            if(!d.trim()){alert('Descreva o problema.');return;}
+            if(reportLat===null){alert('Marque a localizacao no mapa.');return;}
+            var now=new Date();
+            var ds=now.toLocaleDateString('pt-BR')+' '+now.toLocaleTimeString('pt-BR');
+            var params={
+                nome:n,
+                email:em,
+                tipo:t,
+                coordenadas:reportLat.toFixed(6)+', '+reportLng.toFixed(6),
+                descricao:d,
+                data_hora:ds
+            };
+            emailjs.send('service_ywiymhf','template_ajdlyil',params,'znoJ085xroCxBssAY')
+                .then(function(){alert('Report enviado com sucesso! Obrigado.');closeReport();})
+                .catch(function(err){alert('Erro ao enviar. Tente novamente.\n'+JSON.stringify(err));});
+        }
 
         var zB = L.control({position:'topleft'});
         zB.onAdd = function() {
