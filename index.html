@@ -48,17 +48,16 @@
 		.report-send-btn:hover { background: #8b1a1a; }
 		.report-cancel-btn { background: #eee; color: #666; font-size: 12px; }
 		.report-cancel-btn:hover { background: #ddd; }
-        .search-panel { position: absolute; top: 10px; right: 55px; z-index: 1001; display: none; flex-direction: row; gap: 0; }
+        .search-panel { position: fixed; top: auto; right: 44px; z-index: 1001; display: none; flex-direction: row; gap: 0; }
         .search-panel.open { display: flex; }
-        .search-input { width: 220px; padding: 7px 10px; border: 2px solid rgba(0,0,0,0.2); border-right: none; border-radius: 6px 0 0 6px; font-size: 12px; font-family: inherit; outline: none; box-shadow: 0 2px 6px rgba(0,0,0,0.15); background: white; }
+        .search-input { width: 220px; padding: 7px 10px; border: 2px solid rgba(0,0,0,0.2); border-radius: 6px; font-size: 12px; font-family: inherit; outline: none; box-shadow: 0 2px 6px rgba(0,0,0,0.15); background: white; }
         .search-input:focus { border-color: #5a0a0a; }
-        .search-go { padding: 7px 10px; background: #5a0a0a; color: white; border: none; border-radius: 0 6px 6px 0; cursor: pointer; font-size: 13px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
-        .search-go:hover { background: #8b1a1a; }
+        .search-go { display: none; }
         .search-results { position: absolute; top: 36px; left: 0; right: 0; background: white; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); max-height: 200px; overflow-y: auto; display: none; font-size: 12px; }
         .search-result-item { padding: 8px 10px; cursor: pointer; border-bottom: 1px solid #f0f0f0; }
         .search-result-item:hover { background: #fef3f3; }
         .search-result-item:last-child { border-bottom: none; }
-        @media (max-width: 768px) { .search-input { width: 160px; font-size: 11px; } .search-panel { right: 50px; top: 8px; } }
+        @media (max-width: 768px) { .search-input { width: 160px; font-size: 11px; } .search-panel { right: 44px; } }
         @media (max-width: 768px) { .search-input { width: 180px; font-size: 11px; } }
         .crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 500; pointer-events: none; }
         .crosshair::before, .crosshair::after { content: ''; position: absolute; background: rgba(0,0,0,0.35); }
@@ -87,7 +86,7 @@
         .legend-toggle { position: absolute; bottom: 30px; left: 10px; background: white; border: 2px solid rgba(0,0,0,0.2); border-radius: 6px; padding: 5px 8px; font-size: 11px; cursor: pointer; z-index: 998; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
         .legend-toggle:hover { background: #f0f0f0; }
         .mobile-coords { display: none; position: absolute; bottom: 47px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: white; padding: 2px 10px; border-radius: 12px; font-family: Consolas, monospace; font-size: 9px; z-index: 400; white-space: nowrap; pointer-events: none; }
-        .gps-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; font-size: 18px; text-decoration: none; background: white; color: #333; cursor: pointer; transition: all 0.2s; }
+        .gps-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; font-size: 18px; text-decoration: none; background: white; color: #333; cursor: pointer; transition: all 0.2s; line-height: 0; }
         .gps-btn:hover { background: #f4f4f4; }
         .gps-btn.active { background: #1565c0 !important; color: white !important; border-radius: 4px; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
@@ -212,7 +211,17 @@
         var empreend = wmsProxy(WMS_DBGEO_RAW, { layers:'DBGEO:Empreendimentos', styles:'DBGEO:fca', format:'image/png', transparent:true, version:'1.1.1', maxZoom:19, attribution:'IPHAN/DBGEO' });
 
         sitP.addTo(map); sitPol.addTo(map);
-
+        // === SEARCH BOX ===
+        var SearchCtrl = L.control({position:'topright'});
+        SearchCtrl.onAdd = function() {
+            var d = L.DomUtil.create('div','leaflet-bar');
+            d.innerHTML = '<a href="#" id="searchBtn" class="gps-btn" title="Buscar" style="font-size:16px;">&#128269;</a>';
+            d.onclick = function(e) { e.preventDefault(); e.stopPropagation(); toggleSearch(); };
+            L.DomEvent.disableClickPropagation(d);
+            return d;
+        };
+        SearchCtrl.addTo(map);
+		
         L.control.layers(
             { "Satelite": esriSat, "OpenStreetMap": osm, "Topografico": esriTopo, "Ruas": esriStreet, "GMRT Topo": gmrt },
             { "Rotulos": esriLabels,
@@ -244,7 +253,7 @@
         var GpsCtrl = L.control({ position: 'topleft' });
         GpsCtrl.onAdd = function() {
             var d = L.DomUtil.create('div', 'leaflet-bar');
-            d.innerHTML = '<a href="#" id="gpsBtn" class="gps-btn" title="Minha localizacao">&#9678;</a>';
+            d.innerHTML = '<a href="#" id="gpsBtn" class="gps-btn" title="Minha localizacao"><svg width="22" height="22" viewBox="0 0 24 24" style="margin-top:4px;" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="9"/><line x1="12" y1="0" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="24"/><line x1="0" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="24" y2="12"/></svg></a>';
             d.onclick = function(e) { e.preventDefault(); e.stopPropagation(); gpsOn ? stopGps() : startGps(); };
             L.DomEvent.disableClickPropagation(d);
             return d;
@@ -471,22 +480,15 @@
             }
         });
         observer.observe(layersControl, { attributes: true, attributeFilter: ['class'] });
-        // === SEARCH BOX ===
-        var SearchCtrl = L.control({position:'topright'});
-        SearchCtrl.onAdd = function() {
-            var d = L.DomUtil.create('div','leaflet-bar');
-            d.innerHTML = '<a href="#" id="searchBtn" class="gps-btn" title="Buscar" style="font-size:16px;">&#128269;</a>';
-            d.onclick = function(e) { e.preventDefault(); e.stopPropagation(); toggleSearch(); };
-            L.DomEvent.disableClickPropagation(d);
-            return d;
-        };
-        SearchCtrl.addTo(map);
 
         function toggleSearch() {
             var p = document.getElementById('searchPanel');
             if (p.classList.contains('open')) {
                 p.classList.remove('open');
             } else {
+                var btn = document.getElementById('searchBtn');
+                var rect = btn.getBoundingClientRect();
+                p.style.top = rect.top + 'px';
                 p.classList.add('open');
                 document.getElementById('searchInput').focus();
             }
