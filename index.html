@@ -160,8 +160,8 @@
         var PROXY = 'https://iphan-proxy.viniciuspg.workers.dev/?url=';
         var useProxy = (window.location.protocol === 'https:');
 
-        var WMS_SICG_RAW = 'http://portal.iphan.gov.br/geoserver/SICG/wms';
-        var WMS_DBGEO_RAW = 'http://portal.iphan.gov.br/geoserver/DBGEO/wms';
+        var WMS_SICG_RAW = 'https://geoserver.iphan.gov.br/geoserver/SICG/wms';
+        var WMS_DBGEO_RAW = 'https://geoserver.iphan.gov.br/geoserver/DBGEO/wms';
 
         function px(url) { return useProxy ? PROXY + encodeURIComponent(url) : url; }
 
