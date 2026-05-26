@@ -9,6 +9,7 @@
     <meta name="theme-color" content="#5a0a0a">
     <link rel="apple-touch-icon" href="icon-192.png">
 	<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+	<!-- AdSense aguardando aprovação/ativação -->
 	<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2432506794628052" crossorigin="anonymous"></script> -->
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -194,7 +195,7 @@
         var esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19, maxNativeZoom: 18 });
         var esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19, maxNativeZoom: 18 });
         var gmrt = new L.TileLayer.WMSProxy('http://www.gmrt.org/services/mapserver/wms_merc?', {
-            layers: 'topo', format: 'image/jpeg', transparent: false, version: '1.1.1',
+            layers: 'topo', format: 'image/jpeg', transparent: false, version: '1.1.1', srs: 'EPSG:3857',
             maxZoom: 19, attribution: '<a href="https://www.gmrt.org" target="_blank">GMRT</a>/LDEO'
         });
 
@@ -204,7 +205,7 @@
         esriLabels.addTo(map);
 
         function wms(baseUrl, layer, style) {
-            return wmsProxy(baseUrl, { layers: layer, styles: style || '', format: 'image/png', transparent: true, version: '1.1.1', maxZoom: 19, attribution: 'IPHAN' });
+            return wmsProxy(baseUrl, { layers: layer, styles: style || '', format: 'image/png', transparent: true, version: '1.1.1', srs: 'EPSG:4326', maxZoom: 19, attribution: 'IPHAN' });
         }
 
         var sitP = wms(WMS_SICG_RAW,'SICG:sitios','SICG:Tipo_Bem'), sitPol = wms(WMS_SICG_RAW,'SICG:sitios_pol','SICG:Tipo_Bem_pol');
@@ -214,7 +215,7 @@
         var ctxIm = wms(WMS_SICG_RAW,'SICG:ctx_imediato','polygon'), mun = wms(WMS_SICG_RAW,'SICG:municipio','polygon');
         var preSt = wms(WMS_SICG_RAW,'SICG:tg_pre_setor','polygon'), hidro = wms(WMS_SICG_RAW,'SICG:tg_hidrografia','SICG:hidrografia_sicg');
         var nim81 = wms(WMS_SICG_RAW,'SICG:Mapa_Nimuendaju_1981_IBGE','raster'), nim17 = wms(WMS_SICG_RAW,'SICG:Mapa_Nimuendaju_IPHAN_2017','raster');
-        var empreend = wmsProxy(WMS_DBGEO_RAW, { layers:'DBGEO:Empreendimentos', styles:'DBGEO:fca', format:'image/png', transparent:true, version:'1.1.1', maxZoom:19, attribution:'IPHAN/DBGEO' });
+        var empreend = wmsProxy(WMS_DBGEO_RAW, { layers:'DBGEO:Empreendimentos', styles:'DBGEO:fca', format:'image/png', transparent:true, version:'1.1.1', srs: 'EPSG:4326', maxZoom:19, attribution:'IPHAN/DBGEO' });
 
         sitP.addTo(map); sitPol.addTo(map);
         // === SEARCH BOX ===
