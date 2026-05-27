@@ -3,7 +3,6 @@
       "target": {
         "namespace": "android_app",
         "package_name": "io.github.viniciuspg.twa",
-        "sha256_cert_fingerprints": ["D5:F6:7B:30:76:A2:69:47:81:CF:F2:68:95:C0:37:22:DD:9D:F3:0A:32:21:B3:99:01:BF:52:FF:20:FC:42:DF"]
+        "sha256_cert_fingerprints": ["51:BB:49:AB:F0:D2:B2:FB:31:2B:F8:45:53:5C:B0:5B:F1:97:C0:62:1F:AA:FB:7C:F8:62:66:40:88:43:75:CC"]
       }
     }]
-
