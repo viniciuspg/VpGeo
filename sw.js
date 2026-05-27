@@ -1,5 +1,5 @@
 // Service Worker — VpG GeoPatrimonio v1
-const CACHE_NAME = 'geopatrimonio-v1';
+const CACHE_NAME = 'geopatrimonio-v2';
 
 // Recursos essenciais para cache (app shell)
 const APP_SHELL = [
@@ -66,7 +66,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // WMS do IPHAN: network-first (dados dinâmicos)
-  if (url.host.includes('portal.iphan.gov.br')) {
+  if (url.host.includes('geoserver.iphan.gov.br') || url.host.includes('iphan-proxy.viniciuspg.workers.dev')) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
