@@ -163,7 +163,60 @@
         <div id="legendContent"></div>
     </div>
     <button class="legend-toggle" id="legendToggle" onclick="toggleLegend()">Legenda</button>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <div class="guia-overlay" id="guiaOverlay" onclick="if(event.target===this)closeGuia()">
+        <div class="guia-panel">
+            <div class="guia-header">
+                <h2>&#128214; Guia de Uso</h2>
+                <button class="close-btn" onclick="closeGuia()">&#10005;</button>
+            </div>
+            <div class="guia-body">
+                <div class="guia-section">
+                    <h3>&#128506;&#65039; Navegacao</h3>
+                    <p>Arraste o mapa para mover. Use os botoes <strong>+</strong> / <strong>&minus;</strong> ou gesto de pinca para zoom. Clique no botao <strong>BR</strong> para voltar a visao geral do Brasil.</p>
+                </div>
+                <hr class="guia-divider">
+                <div class="guia-section">
+                    <h3>&#128269; Busca</h3>
+                    <p>Clique na lupa (canto superior direito) e digite coordenadas (ex: <em>-27.57, -48.52</em>) ou um endereco (ex: <em>Florianopolis</em>). Pressione Enter para buscar.</p>
+                </div>
+                <hr class="guia-divider">
+                <div class="guia-section">
+                    <h3>&#128205; GPS e Bussola</h3>
+                    <p>Clique no botao de mira (canto superior esquerdo) para ativar sua localizacao em tempo real com precisao e direcao da bussola. Clique novamente para desativar.</p>
+                </div>
+                <hr class="guia-divider">
+                <div class="guia-section">
+                    <h3>&#128203; Camadas</h3>
+                    <p>Clique no icone de camadas (canto superior direito) para trocar o mapa base (Satelite, OSM, Topografico, Ruas, GMRT) e ativar/desativar camadas tematicas: sitios arqueologicos, bens materiais, bens imateriais (BCR), empreendimentos e mais.</p>
+                </div>
+                <hr class="guia-divider">
+                <div class="guia-section">
+                    <h3>&#128070; Consultar Feicoes</h3>
+                    <p>Clique em qualquer ponto do mapa para consultar feicoes (sitios, bens, empreendimentos). Um popup mostrara os dados encontrados. Para bens imateriais, todos os poligonos sobrepostos serao listados.</p>
+                </div>
+                <hr class="guia-divider">
+                <div class="guia-section">
+                    <h3>&#9888;&#65039; Reportar Bem</h3>
+                    <p>Clique no botao <strong>&#9888;</strong> para reportar bens ausentes, com localizacao incorreta ou dados desatualizados. Marque a localizacao no mapa, preencha o formulario e envie.</p>
+                </div>
+                <hr class="guia-divider">
+                <div class="guia-section">
+                    <h3>&#128214; Legenda</h3>
+                    <p>Clique no botao <strong>Legenda</strong> (canto inferior esquerdo) para visualizar a simbologia das camadas ativas.</p>
+                </div>
+                <hr class="guia-divider">
+                <div class="guia-section">
+                    <h3>&#9432; Sobre o VpGeo</h3>
+                    <p>O <strong>VpGeo</strong> e um visualizador geoespacial gratuito e de codigo aberto do patrimonio cultural acautelado em ambito federal pelo IPHAN. Desenvolvido por <strong>Vinicius Paiva Goncalves</strong>.</p>
+                    <p style="margin-top:4px;">Dados WMS: <a href="https://geoserver.iphan.gov.br" target="_blank">GeoServer IPHAN</a> | Bens Imateriais: <a href="https://bcr.iphan.gov.br" target="_blank">BCR/IPHAN</a></p>
+                </div>
+            </div>
+            <div class="guia-footer">
+                VpGeo v7.7 &mdash; <a href="https://github.com/viniciuspg/VpGeo" target="_blank">GitHub</a> | <a href="privacy.html" target="_blank">Privacidade</a>
+            </div>
+        </div>
+    </div>
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         function toggleLegend() {
             var p = document.getElementById('legendPanel'), b = document.getElementById('legendToggle');
@@ -538,6 +591,19 @@
             L.DomEvent.disableClickPropagation(d); return d;
         };
         zB.addTo(map);
+		// === GUIA DE USO ===
+        var GuiaCtrl = L.control({position:'topleft'});
+        GuiaCtrl.onAdd = function() {
+            var d = L.DomUtil.create('div','leaflet-bar');
+            d.innerHTML = '<a href="#" id="guiaBtn" class="gps-btn" title="Guia de uso" style="font-size:16px;">&#10067;</a>';
+            d.onclick = function(e) { e.preventDefault(); e.stopPropagation(); openGuia(); };
+            L.DomEvent.disableClickPropagation(d);
+            return d;
+        };
+        GuiaCtrl.addTo(map);
+
+        function openGuia() { document.getElementById('guiaOverlay').classList.add('open'); }
+        function closeGuia() { document.getElementById('guiaOverlay').classList.remove('open'); }
 // === Botao X no painel de camadas ===
         var layersControl = document.querySelector('.leaflet-control-layers');
         var layersExpanded = false;
