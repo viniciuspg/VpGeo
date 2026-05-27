@@ -693,17 +693,38 @@
             return null;
         }
 
-        function goToCoords(lat, lng) {
-            if (searchMarker) map.removeLayer(searchMarker);
-            searchMarker = L.marker([lat, lng], {
-                icon: L.divIcon({
-                    html: '<div style="background:#d32f2f;color:white;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>',
-                    iconSize: [12, 12], iconAnchor: [6, 6], className: ''
-                })
-            }).addTo(map).bindPopup('<span style="font-family:monospace;font-size:11px;">Lat: ' + lat.toFixed(6) + '<br>Lng: ' + lng.toFixed(6) + '</span>').openPopup();
-            map.setView([lat, lng], 17);
-            document.getElementById('searchResults').style.display = 'none';
-        }
+function clearSearchMarker() {
+    if (searchMarker) {
+        map.removeLayer(searchMarker);
+        searchMarker = null;
+    }
+}
+
+function goToCoords(lat, lng) {
+    if (searchMarker) map.removeLayer(searchMarker);
+
+    searchMarker = L.marker([lat, lng], {
+        icon: L.divIcon({
+            html: '<div style="background:#d32f2f;color:white;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>',
+            iconSize: [12, 12],
+            iconAnchor: [6, 6],
+            className: ''
+        })
+    }).addTo(map).bindPopup(
+        '<div style="min-width:150px;text-align:center;">' +
+            '<div style="font-family:monospace;font-size:11px;margin-bottom:6px;">' +
+                'Lat: ' + lat.toFixed(6) + '<br>' +
+                'Lng: ' + lng.toFixed(6) +
+            '</div>' +
+            '<button onclick="clearSearchMarker()" style="background:#d32f2f;color:white;border:none;border-radius:5px;padding:5px 8px;font-size:11px;cursor:pointer;">' +
+                'Remover marcador' +
+            '</button>' +
+        '</div>'
+    ).openPopup();
+
+    map.setView([lat, lng], 17);
+    document.getElementById('searchResults').style.display = 'none';
+}
 
         // Fecha resultados ao clicar fora
         document.addEventListener('click', function(e) {
