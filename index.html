@@ -596,7 +596,7 @@
         var GuiaCtrl = L.control({position:'topleft'});
         GuiaCtrl.onAdd = function() {
             var d = L.DomUtil.create('div','leaflet-bar');
-            d.innerHTML = '<a href="#" id="guiaBtn" class="gps-btn" title="Guia de uso" style="font-size:16px;color:#1565c0;">&#10067;</a>';
+            d.innerHTML = '<a href="#" id="guiaBtn" class="gps-btn" title="Guia de uso" style="font-size:18px;font-weight:bold;">?</a>';
             d.onclick = function(e) { e.preventDefault(); e.stopPropagation(); openGuia(); };
             L.DomEvent.disableClickPropagation(d);
             return d;
