@@ -117,8 +117,8 @@
     </div>
     <div class="info-bar">
         <div class="info-left">
-            <span class="wms-status"><span class="status-dot"></span> WMS: portal.iphan.gov.br</span>
-            <span class="wms-status"><span class="status-dot"></span> 14 camadas | Clique no mapa para consultar</span>
+            <span class="wms-status"><span class="status-dot"></span> WMS: geoserver.iphan.gov.br</span>
+            <span class="wms-status"><span class="status-dot"></span> 9 camadas + Bens Imateriais (BCR) | Clique no mapa para consultar</span>
         </div>
         <div class="coords" id="coords">Lat: -15.0000 | Lng: -50.0000 | Zoom: 5</div>
     </div>
@@ -181,11 +181,16 @@
             { title: 'Bens Materiais', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_bem_classificacao' },
             { title: 'Bens Materiais \u2014 Pol\u00edgonos', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:bem_poligono' },
             { title: 'Hidrografia', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_hidrografia' },
-            { title: 'Empreendimentos (FCA)', url: WMS_DBGEO_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=Empreendimentos' }
+            { title: 'Empreendimentos (FCA)', url: WMS_DBGEO_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=Empreendimentos' },
+            { title: 'Bens Imateriais (BCR)', url: '' }
         ];
         var lc = document.getElementById('legendContent');
         legendEntries.forEach(function(e) {
-            lc.innerHTML += '<div class="legend-item"><div class="legend-item-title">' + e.title + '</div><img src="' + px(e.url) + '" onerror="this.style.display=\'none\'"></div>';
+            if (e.url) {
+                lc.innerHTML += '<div class="legend-item"><div class="legend-item-title">' + e.title + '</div><img src="' + px(e.url) + '" onerror="this.style.display=\'none\'"></div>';
+            } else {
+                lc.innerHTML += '<div class="legend-item"><div class="legend-item-title">' + e.title + '</div><div style="display:flex;align-items:center;gap:6px;margin-top:2px;"><div style="width:20px;height:14px;background:rgba(137,177,255,0.3);border:1px solid #5a7fbf;border-radius:2px;"></div><span style="font-size:10px;color:#666;">Poligonos (fonte: BCR/IPHAN)</span></div></div>';
+            }
         });
 
         var map = L.map('map', { center: [-15.0, -50.0], zoom: 5, maxZoom: 19, zoomControl: true });
@@ -209,15 +214,37 @@
         }
 
         var sitP = wms(WMS_SICG_RAW,'SICG:sitios','SICG:Tipo_Bem'), sitPol = wms(WMS_SICG_RAW,'SICG:sitios_pol','SICG:Tipo_Bem_pol');
-        var benM = wms(WMS_SICG_RAW,'SICG:tg_bem_classificacao','SICG:Tipo_Bem'), benPr = wms(WMS_SICG_RAW,'SICG:Bem_Protecao','SICG:Tipo_Bem');
+        var benM = wms(WMS_SICG_RAW,'SICG:tg_bem_classificacao','SICG:Tipo_Bem');
         var benPol = wms(WMS_SICG_RAW,'SICG:bem_poligono','SICG:Tipo_Bem_pol');
-        var acSalv = wms(WMS_SICG_RAW,'SICG:tg_acao','SICG:acao'), benIm = wms(WMS_SICG_RAW,'SICG:tg_bem_imaterial','SICG:acao');
-        var ctxIm = wms(WMS_SICG_RAW,'SICG:ctx_imediato','polygon'), mun = wms(WMS_SICG_RAW,'SICG:municipio','polygon');
-        var preSt = wms(WMS_SICG_RAW,'SICG:tg_pre_setor','polygon'), hidro = wms(WMS_SICG_RAW,'SICG:tg_hidrografia','SICG:hidrografia_sicg');
-        var nim81 = wms(WMS_SICG_RAW,'SICG:Mapa_Nimuendaju_1981_IBGE','raster'), nim17 = wms(WMS_SICG_RAW,'SICG:Mapa_Nimuendaju_IPHAN_2017','raster');
+		var mun = wms(WMS_SICG_RAW,'SICG:municipio','polygon');
+		var preSt = wms(WMS_SICG_RAW,'SICG:tg_pre_setor','polygon'), hidro = wms(WMS_SICG_RAW,'SICG:tg_hidrografia','SICG:hidrografia_sicg');
+		var nim17 = wms(WMS_SICG_RAW,'SICG:Mapa_Nimuendaju_IPHAN_2017','raster');
         var empreend = wmsProxy(WMS_DBGEO_RAW, { layers:'DBGEO:Empreendimentos', styles:'DBGEO:fca', format:'image/png', transparent:true, version:'1.1.1', srs: 'EPSG:4326', maxZoom:19, attribution:'IPHAN/DBGEO' });
 
-        sitP.addTo(map); sitPol.addTo(map);
+        // === BENS IMATERIAIS (BCR) ===
+        var bensImatStyle = { fillColor: '#89B1FF', fillOpacity: 0.3, color: '#5a7fbf', weight: 1, opacity: 0.6 };
+        var bensImatLayer = L.layerGroup();
+        fetch('data/bens_imateriais.geojson')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                L.geoJSON(data, {
+                    style: function() { return bensImatStyle; },
+                    onEachFeature: function(feature, layer) {
+                        var p = feature.properties || {};
+                        var nome = p.no_bem_imaterial || p.nome || 'Bem Imaterial';
+                        var local = p.localizacao_especifica || '';
+                        var url = p.URL || p.url || '';
+                        var html = '<div style="max-width:260px;">';
+                        html += '<div style="font-weight:700;color:#5a0a0a;font-size:13px;margin-bottom:4px;">' + nome + '</div>';
+                        if (local) html += '<div style="font-size:11px;color:#555;line-height:1.4;margin-bottom:6px;">' + local + '</div>';
+                        if (url) html += '<a href="' + url + '" target="_blank" style="display:inline-block;padding:4px 10px;background:#5a0a0a;color:white;border-radius:4px;font-size:11px;text-decoration:none;">Ver no BCR</a>';
+                        html += '</div>';
+                        layer.bindPopup(html);
+                    }
+                }).addTo(bensImatLayer);
+            })
+            .catch(function(err) { console.log('[VpGeo] Erro ao carregar bens imateriais:', err); });
+		sitP.addTo(map); sitPol.addTo(map);
         // === SEARCH BOX ===
         var SearchCtrl = L.control({position:'topright'});
         SearchCtrl.onAdd = function() {
@@ -233,13 +260,13 @@
             { "Satelite": esriSat, "OpenStreetMap": osm, "Topografico": esriTopo, "Ruas": esriStreet, "GMRT Topo": gmrt },
             { "Rotulos": esriLabels,
               "Sitios (pontos)": sitP, "Sitios (poligonos)": sitPol,
-              "Bens Materiais": benM, "Protecao": benPr, "Bens Mat. (pol.)": benPol,
-              "Acoes Salvaguarda": acSalv, "Bens Imateriais": benIm,
-              "Contexto Imediato": ctxIm, "Municipios": mun, "Pre Setor": preSt,
-              "Hidrografia": hidro, "Nimuendaju 1981": nim81, "Nimuendaju 2017": nim17,
-              "Empreendimentos (FCA)": empreend },
+              "Bens Materiais": benM, "Bens Mat. (pol.)": benPol,
+              "Municipios": mun, "Pre Setor": preSt,
+              "Hidrografia": hidro, "Nimuendaju 2017": nim17,
+              "Empreendimentos (FCA)": empreend,
+              "Bens Imateriais (BCR)": bensImatLayer },
             { collapsed: true, position: 'topright' }
-        ).addTo(map);
+        ).addTo(map)
 
         L.control.scale({ metric: true, imperial: false, position: 'bottomright' }).addTo(map);
 
