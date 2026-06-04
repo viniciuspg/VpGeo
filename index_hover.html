@@ -633,8 +633,8 @@
         function openGfiDBGEO() { if (lastGfiDBGEO) window.open(lastGfiDBGEO, '_blank'); }
 
         map.on('click', function(e) {
-        removeHover(); clearTimeout(hoverTimer);
-			// Se painel de camadas aberto, fecha e nao abre GFI
+        try { removeHover(); clearTimeout(hoverTimer); } catch(x){}
+            // Se painel de camadas aberto, fecha e nao abre GFI
             if (layersExpanded) {
                 layersControl.classList.remove('leaflet-control-layers-expanded');
                 layersExpanded = false;
