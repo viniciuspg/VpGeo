@@ -143,7 +143,20 @@
         max-width: 260px; white-space: normal; line-height: 1.45;
     }
     .hover-tooltip::before { border-top-color: rgba(90,10,10,0.93) !important; }
-
+/* === HOVER HIGHLIGHT === */
+.hover-highlight-icon { background: transparent !important; border: none !important; }
+.hover-tooltip {
+    background: rgba(90,10,10,0.93) !important;
+    border: 1px solid rgba(255,255,255,0.25) !important;
+    border-radius: 7px !important;
+    color: white !important;
+    font-size: 11px !important;
+    padding: 5px 10px !important;
+    pointer-events: none !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4) !important;
+    max-width: 260px; white-space: normal; line-height: 1.45;
+}
+.hover-tooltip::before { border-top-color: rgba(90,10,10,0.93) !important; }
     </style>
 </head>
 <body>
@@ -907,6 +920,116 @@ function goToCoords(lat, lng) {
                 document.getElementById('searchResults').style.display = 'none';
             }
         });
+		// === HOVER / HIGHLIGHT EXPERIMENTAL ===
+var hoverMarker = null, hoverTip = null, hoverTimer = null, hoverAbort = null;
+
+function removeHover() {
+    if (hoverMarker) { map.removeLayer(hoverMarker); hoverMarker = null; }
+    if (hoverTip) { map.removeLayer(hoverTip); hoverTip = null; }
+    map.getContainer().style.cursor = '';
+}
+
+function highlightIcon() {
+    return L.divIcon({
+        html: '<div style="width:22px;height:22px;border:3px solid #1a6eff;border-radius:50%;background:rgba(26,110,255,0.15);box-shadow:0 0 8px rgba(26,110,255,0.6);"></div>',
+        iconSize: [22, 22], iconAnchor: [11, 11], className: 'hover-highlight-icon'
+    });
+}
+
+function hoverFeatureName(f) {
+    var p = f.properties || {};
+    return p.identificacao_bem || p.no_sitio || p.no_bem || p.nome || p.name || p.NOME ||
+           p.ds_tipo_bem || p.sg_tipo_bem ||
+           (f.id ? f.id.replace(/\.\d+$/, '').replace(/_/g, ' ') : 'Feição');
+}
+
+map.on('mousemove', function(ev) {
+    clearTimeout(hoverTimer);
+    if (hoverAbort) { try { hoverAbort.abort(); } catch(x){} hoverAbort = null; }
+
+    hoverTimer = setTimeout(function() {
+        if (map.getZoom() < 10) { removeHover(); return; }
+
+        var sicgL = [];
+        if (map.hasLayer(sitP))   sicgL.push('SICG:sitios');
+        if (map.hasLayer(sitPol)) sicgL.push('SICG:sitios_pol');
+        if (map.hasLayer(benM))   sicgL.push('SICG:tg_bem_classificacao');
+        if (map.hasLayer(benPol)) sicgL.push('SICG:bem_poligono');
+
+        var dbgeoL = [];
+        if (map.hasLayer(empreend)) dbgeoL.push('DBGEO:Empreendimentos');
+
+        if (sicgL.length === 0 && dbgeoL.length === 0) { removeHover(); return; }
+
+        var pt2  = map.latLngToContainerPoint(ev.latlng);
+        var sz2  = map.getSize();
+        var b2   = map.getBounds();
+        var bbox2 = b2.getWest()+','+b2.getSouth()+','+b2.getEast()+','+b2.getNorth();
+
+        function mkGfi(base, lyrs) {
+            return base + '?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo' +
+                '&QUERY_LAYERS=' + lyrs + '&LAYERS=' + lyrs +
+                '&INFO_FORMAT=application/json&FEATURE_COUNT=1' +
+                '&FORMAT=image/png&TRANSPARENT=true' +
+                '&SRS=EPSG:4326&WIDTH=' + sz2.x + '&HEIGHT=' + sz2.y +
+                '&BBOX=' + bbox2 +
+                '&X=' + Math.round(pt2.x) + '&Y=' + Math.round(pt2.y) +
+                '&BUFFER=3';
+        }
+
+        hoverAbort = new AbortController();
+        var sig = hoverAbort.signal;
+        var fetches = [];
+
+        if (sicgL.length > 0) {
+            var url1 = useProxy ? PROXY + encodeURIComponent(mkGfi(WMS_SICG_RAW, sicgL.join(','))) : mkGfi(WMS_SICG_RAW, sicgL.join(','));
+            fetches.push(fetch(url1, {signal: sig}).then(function(r){return r.json();}).catch(function(){return null;}));
+        }
+        if (dbgeoL.length > 0) {
+            var url2 = useProxy ? PROXY + encodeURIComponent(mkGfi(WMS_DBGEO_RAW, dbgeoL.join(','))) : mkGfi(WMS_DBGEO_RAW, dbgeoL.join(','));
+            fetches.push(fetch(url2, {signal: sig}).then(function(r){return r.json();}).catch(function(){return null;}));
+        }
+
+        Promise.all(fetches).then(function(results) {
+            hoverAbort = null;
+            removeHover();
+
+            var all = [];
+            results.forEach(function(d) { if (d && d.features) all = all.concat(d.features); });
+            if (all.length === 0) return;
+
+            map.getContainer().style.cursor = 'pointer';
+            var f0 = all[0];
+            var ll = ev.latlng;
+            if (f0.geometry && f0.geometry.type === 'Point' && f0.geometry.coordinates) {
+                ll = L.latLng(f0.geometry.coordinates[1], f0.geometry.coordinates[0]);
+            }
+
+            hoverMarker = L.marker(ll, { icon: highlightIcon(), interactive: false, zIndexOffset: 900 }).addTo(map);
+
+            var nome = hoverFeatureName(f0);
+            var tip = '<div><strong style="font-size:11px;">' + nome + '</strong>';
+            if (all.length > 1) tip += '<br><span style="font-size:9px;opacity:0.75;">+' + (all.length-1) + ' próximo(s)</span>';
+            tip += '</div>';
+
+            hoverTip = L.tooltip({ permanent: true, direction: 'top', className: 'hover-tooltip', offset: [0, -14] })
+                .setLatLng(ll).setContent(tip).addTo(map);
+
+        }).catch(function(err) {
+            if (err && err.name === 'AbortError') return;
+            removeHover();
+        });
+
+    }, 150);
+});
+
+map.on('mouseout', function() {
+    clearTimeout(hoverTimer);
+    if (hoverAbort) { try { hoverAbort.abort(); } catch(x){} hoverAbort = null; }
+    removeHover();
+});
+
+map.on('popupclose', function() { removeHover(); });
 		console.log('[VpGeo v1.4] Proxy: ' + (useProxy ? 'ATIVO (HTTPS)' : 'DESATIVADO (local)'));
     </script>
     <script>
