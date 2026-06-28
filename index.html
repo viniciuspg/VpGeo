@@ -2,14 +2,6 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-	<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZJTNW92T50"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-ZJTNW92T50');
-</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VpGeo — Visualizador de Patrimônio Geoespacial</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -76,15 +68,16 @@
 		.report-cancel-btn:hover { background: #ddd; }
         .search-panel { position: fixed; top: auto; right: 44px; z-index: 1001; display: none; flex-direction: row; gap: 0; }
         .search-panel.open { display: flex; }
-        .search-input { width: 220px; padding: 7px 10px; border: 2px solid rgba(0,0,0,0.2); border-radius: 6px; font-size: 12px; font-family: inherit; outline: none; box-shadow: 0 2px 6px rgba(0,0,0,0.15); background: white; }
+        .search-input { width: 320px; padding: 7px 10px; border: 2px solid rgba(0,0,0,0.2); border-radius: 6px; font-size: 12px; font-family: inherit; outline: none; box-shadow: 0 2px 6px rgba(0,0,0,0.15); background: white; }
         .search-input:focus { border-color: #5a0a0a; }
         .search-go { display: none; }
-        .search-results { position: absolute; top: 36px; left: 0; right: 0; background: white; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); max-height: 200px; overflow-y: auto; display: none; font-size: 12px; }
+        .search-results { position: absolute; top: 36px; left: 0; width: 320px; right: auto; background: white; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); max-height: 380px; overflow-y: auto; display: none; font-size: 12px; }
+		.search-result-item { padding: 7px 10px; cursor: pointer; border-bottom: 1px solid #f0f0f0; }
+		.search-result-item:hover { background: #fef3f3; }
         .search-result-item { padding: 8px 10px; cursor: pointer; border-bottom: 1px solid #f0f0f0; }
         .search-result-item:hover { background: #fef3f3; }
         .search-result-item:last-child { border-bottom: none; }
-        @media (max-width: 768px) { .search-input { width: 160px; font-size: 11px; } .search-panel { right: 44px; } }
-        @media (max-width: 768px) { .search-input { width: 180px; font-size: 11px; } }
+        @media (max-width: 768px) { .search-input { width: 240px; font-size: 11px; } .search-panel { right: 44px; } .search-results { width: 280px; } }
         .crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 500; pointer-events: none; }
         .crosshair::before, .crosshair::after { content: ''; position: absolute; background: rgba(0,0,0,0.35); }
         .crosshair::before { width: 1px; height: 20px; top: -10px; left: 0; }
@@ -115,6 +108,7 @@
         .gps-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; font-size: 18px; text-decoration: none; background: white; color: #333; cursor: pointer; transition: all 0.2s; line-height: 0; }
         .gps-btn:hover { background: #f4f4f4; }
         .gps-btn.active { background: #1565c0 !important; color: white !important; border-radius: 4px; }
+		.gps-btn.follow-paused { background: #ff9800 !important; color: white !important; border-radius: 4px; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
         .gps-marker-wrap { position: relative; width: 20px; height: 36px; transition: transform 0.15s ease-out; }
         .gps-arrow { width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 16px solid #1565c0; position: absolute; top: 0; left: 3px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
@@ -128,7 +122,8 @@
             .legend-toggle { bottom: 24px; left: 6px; font-size: 10px; padding: 4px 6px; }
             .leaflet-control-layers { max-height: 70vh; font-size: 11px; }
         }
-    </style>
+    
+	</style>
 </head>
 <body>
     <div class="header">
@@ -187,12 +182,20 @@
                 <hr class="guia-divider">
                 <div class="guia-section">
                     <h3>&#128269; Busca</h3>
-                    <p>Clique na lupa (canto superior direito) e digite coordenadas (ex: <em>-27.57, -48.52</em>) ou um endereco (ex: <em>Florianopolis</em>). Pressione Enter para buscar.</p>
+                    <p>Clique na lupa (canto superior direito) e digite:</p>
+					<ul style="margin:4px 0 0 16px;padding:0;font-size:11px;">
+					  <li><strong>Nome de sítio ou bem</strong> (ex: <em>Centro Histórico</em>, <em>Sambaqui</em>)</li>
+					  <li><strong>Código IPHAN</strong> (ex: <em>SC4205407</em>)</li>
+					  <li><strong>Endereço</strong> (ex: <em>Florianópolis</em>)</li>
+					  <li><strong>Coordenadas</strong> (ex: <em>-27.57, -48.52</em>)</li>
+					</ul>
+					<p style="margin-top:4px;">Pressione Enter. Resultados mistos serão exibidos por seção.</p>
                 </div>
                 <hr class="guia-divider">
                 <div class="guia-section">
                     <h3>&#128205; GPS e Bussola</h3>
-                    <p>Clique no botao de mira (canto superior esquerdo) para ativar sua localizacao em tempo real com precisao e direcao da bussola. Clique novamente para desativar.</p>
+					<p>Toque no botão de mira (canto superior esquerdo) para ativar sua localização em tempo real com bússola. O mapa <strong>acompanha você</strong> automaticamente. Se arrastar o mapa para explorar, o botão fica <strong>laranja</strong> indicando que o acompanhamento pausou — toque novamente para re-centralizar. Toque mais uma vez para desligar.</p>
+					<p style="margin-top:4px;font-size:10px;color:#888;"><em>💡 Dica: se a seta da bússola parecer imprecisa, balance o celular fazendo um movimento em "8" no ar — isso recalibra o sensor magnético.</em></p>
                 </div>
                 <hr class="guia-divider">
                 <div class="guia-section">
@@ -374,76 +377,149 @@
 
         // === GPS + COMPASS ===
         var gpsOn = false, gpsWid = null, gpsMk = null, gpsCi = null;
+		var gpsOn = false, gpsFollow = false, gpsWid = null, gpsMk = null, gpsCi = null;
         var compassActive = false, currentHeading = 0;
 
         var GpsCtrl = L.control({ position: 'topleft' });
         GpsCtrl.onAdd = function() {
             var d = L.DomUtil.create('div', 'leaflet-bar');
             d.innerHTML = '<a href="#" id="gpsBtn" class="gps-btn" title="Minha localizacao"><svg width="22" height="22" viewBox="0 0 24 24" style="margin-top:4px;" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="9"/><line x1="12" y1="0" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="24"/><line x1="0" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="24" y2="12"/></svg></a>';
-            d.onclick = function(e) { e.preventDefault(); e.stopPropagation(); gpsOn ? stopGps() : startGps(); };
+            d.onclick = function(e) {
+				e.preventDefault(); e.stopPropagation();
+				if (!gpsOn) {
+					startGps();
+				} else if (!gpsFollow) {
+					// GPS já ligado, mas estava pausado → re-engaja follow + recentra
+					gpsFollow = true;
+					document.getElementById('gpsBtn').classList.remove('follow-paused');
+					if (gpsMk) { map.panTo(gpsMk.getLatLng(), { animate: true, duration: 0.5 }); }
+				} else {
+					stopGps();
+				}
+			};
             L.DomEvent.disableClickPropagation(d);
             return d;
         };
         GpsCtrl.addTo(map);
 
         function onOrientation(e) {
-            var heading;
-            if (e.webkitCompassHeading !== undefined) { heading = e.webkitCompassHeading; }
-            else if (e.alpha !== null) { heading = (360 - e.alpha); }
-            if (heading !== undefined && !isNaN(heading)) {
-                currentHeading = heading;
-                var arrow = document.getElementById('gpsArrow');
-                if (arrow) arrow.style.transform = 'rotate(' + Math.round(heading) + 'deg)';
-            }
-        }
+			var heading;
+
+			// iOS Safari: já entrega o heading corrigido (norte verdadeiro)
+			if (e.webkitCompassHeading !== undefined) {
+				heading = e.webkitCompassHeading;
+			}
+			// Android Chrome / outros: calcular a partir de alpha
+			else if (e.alpha !== null && e.alpha !== undefined) {
+				heading = (360 - e.alpha);
+			}
+
+			if (heading === undefined || isNaN(heading)) return;
+
+			// 🔧 CORREÇÃO: compensar a orientação da tela (retrato/paisagem)
+			var screenAngle = 0;
+			if (screen.orientation && typeof screen.orientation.angle === 'number') {
+				screenAngle = screen.orientation.angle;  // 0, 90, 180 ou 270
+			} else if (typeof window.orientation === 'number') {
+				// fallback para Safari iOS antigo
+				screenAngle = window.orientation;
+			}
+
+			// Em iOS o webkitCompassHeading já vem ajustado em alguns devices,
+			// mas no Android precisamos subtrair o ângulo da tela
+			var adjusted = (heading - screenAngle + 360) % 360;
+
+			currentHeading = adjusted;
+			var arrow = document.getElementById('gpsArrow');
+			if (arrow) arrow.style.transform = 'rotate(' + Math.round(adjusted) + 'deg)';
+		}
 
         function startCompass() {
-            if (compassActive) return;
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                DeviceOrientationEvent.requestPermission().then(function(state) {
-                    if (state === 'granted') { window.addEventListener('deviceorientation', onOrientation, true); compassActive = true; }
-                }).catch(function(err) { console.log('Compass error:', err); });
-            } else if (window.DeviceOrientationEvent) {
-                if ('ondeviceorientationabsolute' in window) { window.addEventListener('deviceorientationabsolute', onOrientation, true); }
-                else { window.addEventListener('deviceorientation', onOrientation, true); }
-                compassActive = true;
-            }
-        }
+			if (compassActive) return;
+			if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+				DeviceOrientationEvent.requestPermission().then(function(state) {
+					if (state === 'granted') {
+						window.addEventListener('deviceorientation', onOrientation, true);
+						compassActive = true;
+					}
+				}).catch(function(err) { console.log('Compass error:', err); });
+			} else if (window.DeviceOrientationEvent) {
+				if ('ondeviceorientationabsolute' in window) {
+					window.addEventListener('deviceorientationabsolute', onOrientation, true);
+				} else {
+					window.addEventListener('deviceorientation', onOrientation, true);
+				}
+				compassActive = true;
+			}
+
+			// 🔧 Re-ajusta a seta quando o usuário girar o celular
+			if (screen.orientation && screen.orientation.addEventListener) {
+				screen.orientation.addEventListener('change', onScreenOrientationChange);
+			} else {
+				window.addEventListener('orientationchange', onScreenOrientationChange);
+			}
+		}
+
+function onScreenOrientationChange() {
+    // força recálculo no próximo evento de orientação
+    // (a maioria dos devices já dispara sozinho, mas garante)
+    var arrow = document.getElementById('gpsArrow');
+    if (arrow) arrow.style.transition = 'transform 0.3s ease-out';
+}
 
         function stopCompass() {
-            window.removeEventListener('deviceorientation', onOrientation, true);
-            window.removeEventListener('deviceorientationabsolute', onOrientation, true);
-            compassActive = false;
-        }
+			window.removeEventListener('deviceorientation', onOrientation, true);
+			window.removeEventListener('deviceorientationabsolute', onOrientation, true);
+			if (screen.orientation && screen.orientation.removeEventListener) {
+				screen.orientation.removeEventListener('change', onScreenOrientationChange);
+			} else {
+				window.removeEventListener('orientationchange', onScreenOrientationChange);
+			}
+			compassActive = false;
+		}
 
         function startGps() {
-            if (!navigator.geolocation) { alert('Geolocalizacao nao suportada.'); return; }
-            gpsOn = true; document.getElementById('gpsBtn').classList.add('active');
-            gpsWid = navigator.geolocation.watchPosition(function(pos) {
-                var la = pos.coords.latitude, lo = pos.coords.longitude, ac = pos.coords.accuracy;
-                if (gpsMk) { gpsMk.setLatLng([la,lo]); gpsCi.setLatLng([la,lo]).setRadius(ac); }
-                else {
-                    gpsMk = L.marker([la,lo], {
-                        icon: L.divIcon({ html:'<div class="gps-marker-wrap" id="gpsArrow"><div class="gps-arrow"></div><div class="gps-dot"></div></div>', iconSize:[20,36], iconAnchor:[10,36], className:'' }),
-                        zIndexOffset: 9999
-                    }).addTo(map);
-                    gpsCi = L.circle([la,lo], { radius:ac, color:'#1565c0', fillColor:'#1565c0', fillOpacity:0.1, weight:1 }).addTo(map);
-                    map.setView([la,lo], 15);
-                    startCompass();
-                }
-                gpsMk.bindPopup('<strong>Voce esta aqui</strong><br><span style="font-size:11px;font-family:monospace;">Lat: '+la.toFixed(6)+'<br>Lng: '+lo.toFixed(6)+'<br>Precisao: &plusmn;'+ac.toFixed(1)+' m<br>Direcao: '+Math.round(currentHeading)+'&deg;</span>');
-            }, function(err) {
-                stopGps();
-                alert(err.code===1?'Permissao negada.':err.code===2?'Localizacao indisponivel.':'Erro: '+err.message);
-            }, { enableHighAccuracy:true, timeout:15000, maximumAge:0 });
-        }
+			if (!navigator.geolocation) { alert('Geolocalizacao nao suportada.'); return; }
+			gpsOn = true;
+			gpsFollow = true;  // ⬅️ liga follow automático no início
+			document.getElementById('gpsBtn').classList.add('active');
+			document.getElementById('gpsBtn').classList.remove('follow-paused');
+
+			gpsWid = navigator.geolocation.watchPosition(function(pos) {
+				var la = pos.coords.latitude, lo = pos.coords.longitude, ac = pos.coords.accuracy;
+				if (gpsMk) {
+					gpsMk.setLatLng([la,lo]);
+					gpsCi.setLatLng([la,lo]).setRadius(ac);
+					// ⬇️ NOVA LINHA: se follow ativo, pan suave acompanhando o GPS
+					if (gpsFollow) {
+						map.panTo([la,lo], { animate: true, duration: 0.5 });
+					}
+				} else {
+					gpsMk = L.marker([la,lo], {
+						icon: L.divIcon({ html:'<div class="gps-marker-wrap" id="gpsArrow"><div class="gps-arrow"></div><div class="gps-dot"></div></div>', iconSize:[20,36], iconAnchor:[10,36], className:'' }),
+						zIndexOffset: 9999
+					}).addTo(map);
+					gpsCi = L.circle([la,lo], { radius:ac, color:'#1565c0', fillColor:'#1565c0', fillOpacity:0.1, weight:1 }).addTo(map);
+					map.setView([la,lo], 15);
+					startCompass();
+				}
+				gpsMk.bindPopup('<strong>Voce esta aqui</strong><br><span style="font-size:11px;font-family:monospace;">Lat: '+la.toFixed(6)+'<br>Lng: '+lo.toFixed(6)+'<br>Precisao: &plusmn;'+ac.toFixed(1)+' m<br>Direcao: '+Math.round(currentHeading)+'&deg;</span>');
+			}, function(err) {
+				stopGps();
+				alert(err.code===1?'Permissao negada.':err.code===2?'Localizacao indisponivel.':'Erro: '+err.message);
+			}, { enableHighAccuracy:true, timeout:15000, maximumAge:0 });
+		}
         function stopGps() {
-            gpsOn = false; document.getElementById('gpsBtn').classList.remove('active');
-            if (gpsWid!==null) { navigator.geolocation.clearWatch(gpsWid); gpsWid=null; }
-            if (gpsMk) { map.removeLayer(gpsMk); gpsMk=null; }
-            if (gpsCi) { map.removeLayer(gpsCi); gpsCi=null; }
-            stopCompass();
-        }
+			gpsOn = false;
+			gpsFollow = false;
+			var btn = document.getElementById('gpsBtn');
+			btn.classList.remove('active');
+			btn.classList.remove('follow-paused');
+			if (gpsWid!==null) { navigator.geolocation.clearWatch(gpsWid); gpsWid=null; }
+			if (gpsMk) { map.removeLayer(gpsMk); gpsMk=null; }
+			if (gpsCi) { map.removeLayer(gpsCi); gpsCi=null; }
+			stopCompass();
+		}
 
         // === GetFeatureInfo Inteligente ===
         var skipFields = ['geom','the_geom','geometry','bbox','shape'];
@@ -659,35 +735,180 @@
         document.getElementById('searchInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
 
         function doSearch() {
-            var q = document.getElementById('searchInput').value.trim();
-            if (!q) return;
-            document.getElementById('searchResults').style.display = 'none';
+    var q = document.getElementById('searchInput').value.trim();
+    if (!q) return;
+    var box = document.getElementById('searchResults');
+    box.style.display = 'none';
 
-            // Tenta interpretar como coordenadas
-            var coords = parseCoords(q);
-            if (coords) {
-                goToCoords(coords.lat, coords.lng);
-                return;
-            }
-            // Busca por endereço via Nominatim
-            fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&q=' + encodeURIComponent(q))
-                .then(function(r) { return r.json(); })
-                .then(function(data) {
-                    if (data.length === 0) { alert('Nenhum resultado encontrado.'); return; }
-                    if (data.length === 1) { goToCoords(parseFloat(data[0].lat), parseFloat(data[0].lon)); return; }
-                    var box = document.getElementById('searchResults');
-                    box.innerHTML = '';
-                    data.forEach(function(item) {
-                        var div = document.createElement('div');
-                        div.className = 'search-result-item';
-                        div.textContent = item.display_name;
-                        div.onclick = function() { goToCoords(parseFloat(item.lat), parseFloat(item.lon)); box.style.display = 'none'; };
-                        box.appendChild(div);
-                    });
-                    box.style.display = 'block';
-                })
-                .catch(function() { alert('Erro na busca. Verifique sua conexao.'); });
+    // 1) Coordenadas → vai direto
+    var coords = parseCoords(q);
+    if (coords) { goToCoords(coords.lat, coords.lng); return; }
+
+    // 2) Texto: buscar SIMULTANEAMENTE em Nominatim + IPHAN
+    box.innerHTML = '<div style="padding:10px;color:#888;font-size:11px;">⏳ Buscando...</div>';
+    box.style.display = 'block';
+
+    Promise.all([
+        searchNominatim(q).catch(function() { return []; }),
+        searchIphan(q).catch(function() { return []; })
+    ]).then(function(results) {
+        var nominatimRes = results[0];
+        var iphanRes     = results[1];
+        renderMixedResults(nominatimRes, iphanRes);
+    });
+}
+
+// ===== Busca Nominatim (endereços) =====
+function searchNominatim(q) {
+    return fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&q=' + encodeURIComponent(q))
+        .then(function(r) { return r.json(); });
+}
+
+// ===== Busca IPHAN GeoServer (sítios + bens materiais) =====
+var IPHAN_SEARCH_LAYERS = [
+    { layer: 'SICG:tg_bem_classificacao', workspace: 'SICG', geomType: 'point'   },
+    { layer: 'SICG:bem_poligono',          workspace: 'SICG', geomType: 'polygon' }
+];
+
+function searchIphan(term) {
+    var termSafe = term.replace(/'/g, "''");
+    var cql =
+        "strToLowerCase(identificacao_bem) LIKE '%" + termSafe.toLowerCase() + "%' " +
+        "OR strToUpperCase(co_iphan) LIKE '%" + termSafe.toUpperCase() + "%'";
+
+    var all = [];
+    return Promise.all(IPHAN_SEARCH_LAYERS.map(function(cfg) {
+        var wfs = 'https://geoserver.iphan.gov.br/geoserver/' + cfg.workspace + '/ows' +
+            '?service=WFS&version=2.0.0&request=GetFeature' +
+            '&typeNames=' + cfg.layer +
+            '&outputFormat=application/json' +
+            '&srsName=EPSG:4326&count=20' +
+            '&CQL_FILTER=' + encodeURIComponent(cql);
+        var url = PROXY + encodeURIComponent(wfs);
+        return fetch(url).then(function(r) { return r.json(); }).then(function(gj) {
+            (gj.features || []).forEach(function(f) {
+                f.properties._geomType = cfg.geomType;
+                all.push(f);
+            });
+        }).catch(function() {});
+    })).then(function() {
+        // Dedup: prioriza polígono se mesmo id_bem aparecer duas vezes
+        var seen = {};
+        all.forEach(function(f) {
+            var id = f.properties.id_bem;
+            if (!seen[id] || f.properties._geomType === 'polygon') seen[id] = f;
+        });
+        return Object.keys(seen).map(function(k) { return seen[k]; });
+    });
+}
+
+// ===== Render misto =====
+var UF_MAP_VPGEO = {
+    AC:'Acre',AL:'Alagoas',AP:'Amapá',AM:'Amazonas',BA:'Bahia',CE:'Ceará',
+    DF:'Distrito Federal',ES:'Espírito Santo',GO:'Goiás',MA:'Maranhão',
+    MT:'Mato Grosso',MS:'Mato Grosso do Sul',MG:'Minas Gerais',PA:'Pará',
+    PB:'Paraíba',PR:'Paraná',PE:'Pernambuco',PI:'Piauí',RJ:'Rio de Janeiro',
+    RN:'Rio Grande do Norte',RS:'Rio Grande do Sul',RO:'Rondônia',
+    RR:'Roraima',SC:'Santa Catarina',SP:'São Paulo',SE:'Sergipe',TO:'Tocantins'
+};
+
+function renderMixedResults(nominatimRes, iphanRes) {
+    var box = document.getElementById('searchResults');
+    box.innerHTML = '';
+
+    if ((!nominatimRes || nominatimRes.length === 0) && (!iphanRes || iphanRes.length === 0)) {
+        box.innerHTML = '<div style="padding:10px;color:#999;font-size:11px;">Nenhum resultado encontrado.</div>';
+        return;
+    }
+
+    // Seção IPHAN (sítios + bens) — vem primeiro pois é o foco
+    if (iphanRes && iphanRes.length) {
+        iphanRes.sort(function(a, b) {
+            var aArq = (a.properties.ds_natureza || '').indexOf('Arqueol') >= 0 ? 0 : 1;
+            var bArq = (b.properties.ds_natureza || '').indexOf('Arqueol') >= 0 ? 0 : 1;
+            if (aArq !== bArq) return aArq - bArq;
+            return (a.properties.identificacao_bem || '').localeCompare(b.properties.identificacao_bem || '');
+        });
+        var hdr1 = document.createElement('div');
+        hdr1.style.cssText = 'padding:5px 10px;background:#fef3f3;font-size:10px;font-weight:700;color:#5a0a0a;border-bottom:1px solid #f0d0d0;';
+        hdr1.textContent = '⛏️🏛️ SÍTIOS E BENS (IPHAN) — ' + iphanRes.length;
+        box.appendChild(hdr1);
+        iphanRes.slice(0, 30).forEach(function(f) {
+            var p = f.properties;
+            var name = p.identificacao_bem || 'Sem nome';
+            var uf = (p.co_iphan || '').substring(0, 2);
+            var isArq = (p.ds_natureza || '').indexOf('Arqueol') >= 0;
+            var icon = isArq ? '⛏️' : '🏛️';
+            var geom = p._geomType === 'polygon' ? '🟫' : '📍';
+            var tipo = p.ds_tipo_bem || p.ds_natureza || '';
+            var div = document.createElement('div');
+            div.className = 'search-result-item';
+            div.innerHTML =
+                '<div style="font-weight:600;font-size:12px;color:#222;">' + icon + ' ' + name + '</div>' +
+                '<div style="font-size:10px;color:#666;">' + geom + ' ' + tipo + ' • ' + uf +
+                (UF_MAP_VPGEO[uf] ? ' (' + UF_MAP_VPGEO[uf] + ')' : '') + '</div>';
+            div.onclick = function() { goToIphanFeature(f); box.style.display = 'none'; };
+            box.appendChild(div);
+        });
+    }
+
+    // Seção Nominatim (endereços/locais)
+    if (nominatimRes && nominatimRes.length) {
+        var hdr2 = document.createElement('div');
+        hdr2.style.cssText = 'padding:5px 10px;background:#f0f7ff;font-size:10px;font-weight:700;color:#1565c0;border-bottom:1px solid #d0e0f0;';
+        hdr2.textContent = '🗺️ LOCAIS (OpenStreetMap) — ' + nominatimRes.length;
+        box.appendChild(hdr2);
+        nominatimRes.forEach(function(item) {
+            var div = document.createElement('div');
+            div.className = 'search-result-item';
+            div.innerHTML = '<div style="font-size:11px;color:#333;">📍 ' + item.display_name + '</div>';
+            div.onclick = function() {
+                goToCoords(parseFloat(item.lat), parseFloat(item.lon));
+                box.style.display = 'none';
+            };
+            box.appendChild(div);
+        });
+    }
+
+    box.style.display = 'block';
+}
+
+// ===== Ir para feição IPHAN (zoom + destaque + popup) =====
+var _iphanHighlight = null;
+function goToIphanFeature(feature) {
+    if (_iphanHighlight) map.removeLayer(_iphanHighlight);
+    _iphanHighlight = L.geoJSON(feature, {
+        style: { color: '#ff0000', weight: 3, fillColor: '#ff0000', fillOpacity: 0.3 },
+        pointToLayer: function(f, ll) {
+            return L.circleMarker(ll, {
+                radius: 12, color: '#ff0000', weight: 3,
+                fillColor: '#ff0000', fillOpacity: 0.5
+            });
         }
+    }).addTo(map);
+
+    var p = feature.properties;
+    var html =
+    '<div style="font-size:12px;max-width:280px;max-height:50vh;overflow-y:auto;padding-right:4px;">' +
+    '<div style="font-weight:700;font-size:13px;color:#5a0a0a;margin-bottom:6px;position:sticky;top:0;background:white;padding-bottom:4px;border-bottom:1px solid #eee;">' +
+    (p.identificacao_bem || 'Sem nome') + '</div>' +
+    '<b>Natureza:</b> ' + (p.ds_natureza || '-') + '<br>' +
+    '<b>Tipo:</b> ' + (p.ds_tipo_bem || '-') + '<br>' +
+    '<b>Classificação:</b> ' + (p.ds_classificacao || '-') + '<br>' +
+    '<b>Cód. IPHAN:</b> ' + (p.co_iphan || '-') +
+    (p.sintese_bem ? '<hr style="margin:6px 0;border:none;border-top:1px solid #eee;"><i style="font-size:11px;">' + p.sintese_bem + '</i>' : '') +
+    '<br><button onclick="clearIphanHighlight()" style="margin-top:6px;background:#5a0a0a;color:white;border:none;border-radius:4px;padding:4px 8px;font-size:10px;cursor:pointer;">Remover destaque</button>' +
+    '</div>';
+    _iphanHighlight.bindPopup(html, { maxWidth: 320, maxHeight: 400, autoPan: true }).openPopup();
+
+    var b = _iphanHighlight.getBounds();
+    if (b.isValid()) map.fitBounds(b, { maxZoom: 17 });
+}
+
+function clearIphanHighlight() {
+    if (_iphanHighlight) { map.removeLayer(_iphanHighlight); _iphanHighlight = null; }
+    map.closePopup();
+}
 
 function parseCoords(str) {
     str = str.replace(/\s+/g, ' ').trim();
@@ -753,8 +974,17 @@ function goToCoords(lat, lng) {
                 document.getElementById('searchResults').style.display = 'none';
             }
         });
+		// === Pausa follow do GPS se usuário arrastar o mapa manualmente ===
+		map.on('dragstart', function() {
+			if (gpsOn && gpsFollow) {
+				gpsFollow = false;
+				var btn = document.getElementById('gpsBtn');
+				if (btn) btn.classList.add('follow-paused');
+			}
+		});
 		console.log('[VpGeo v1.4] Proxy: ' + (useProxy ? 'ATIVO (HTTPS)' : 'DESATIVADO (local)'));
-    </script>
+
+	</script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js')
