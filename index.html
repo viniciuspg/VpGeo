@@ -772,9 +772,12 @@ var IPHAN_SEARCH_LAYERS = [
 
 function searchIphan(term) {
     var termSafe = term.replace(/'/g, "''");
+    // Normaliza código IPHAN removendo hífens (aceita SC-4218400-BA-ST-00003 e SC4218400BAST00003)
+    var termSemHifens = termSafe.replace(/-/g, '');
     var cql =
         "strToLowerCase(identificacao_bem) LIKE '%" + termSafe.toLowerCase() + "%' " +
-        "OR strToUpperCase(co_iphan) LIKE '%" + termSafe.toUpperCase() + "%'";
+        "OR strToUpperCase(co_iphan) LIKE '%" + termSafe.toUpperCase() + "%' " +
+        "OR strToUpperCase(co_iphan) LIKE '%" + termSemHifens.toUpperCase() + "%'";
 
     var all = [];
     return Promise.all(IPHAN_SEARCH_LAYERS.map(function(cfg) {
