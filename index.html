@@ -767,7 +767,9 @@ function searchNominatim(q) {
 // ===== Busca IPHAN GeoServer (sítios + bens materiais) =====
 var IPHAN_SEARCH_LAYERS = [
     { layer: 'SICG:tg_bem_classificacao', workspace: 'SICG', geomType: 'point'   },
-    { layer: 'SICG:bem_poligono',          workspace: 'SICG', geomType: 'polygon' }
+    { layer: 'SICG:bem_poligono',          workspace: 'SICG', geomType: 'polygon' },
+    { layer: 'SICG:sitios',                workspace: 'SICG', geomType: 'point'   },
+    { layer: 'SICG:sitios_pol',            workspace: 'SICG', geomType: 'polygon' }
 ];
 
 function searchIphan(term) {
