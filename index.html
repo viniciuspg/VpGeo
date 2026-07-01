@@ -186,10 +186,11 @@
 					<ul style="margin:4px 0 0 16px;padding:0;font-size:11px;">
 					  <li><strong>Nome de sitio ou bem</strong> (ex: <em>Garopaba do Sul I</em>, <em>Ponte Hercílio Luz</em>)</li>
 					  <li><strong>Codigo IPHAN</strong> com ou sem hifens (ex: <em>SC-4208807-BA-ST-00008</em> ou <em>SC4208807BAST00008</em>)</li>
+					  <li><strong>Empreendimento FCA</strong> por nome, razao social, ID ou processo SEI (exemplos ficticios: <em>UHE Rio Fictício</em>, <em>99999</em> ou <em>01000.000000/0000-00</em>)</li>
 					  <li><strong>Endereco ou cidade</strong> (ex: <em>Florianopolis</em>)</li>
 					  <li><strong>Coordenadas</strong> (ex: <em>-27.57, -48.52</em>)</li>
 					</ul>
-					<p style="margin-top:4px;">Pressione Enter. Os resultados sao exibidos em duas secoes: <strong>Sitios e Bens (IPHAN)</strong> e <strong>Locais (OpenStreetMap)</strong>. Clique em um resultado para ir ate ele no mapa.</p>
+					<p style="margin-top:4px;">Pressione Enter. Os resultados sao exibidos em secoes separadas: <strong>Sitios e Bens (IPHAN)</strong>, <strong>Empreendimentos (FCA)</strong> e <strong>Locais (OpenStreetMap)</strong>.</p>
 				</div>
                 <hr class="guia-divider">
                 <div class="guia-section">
@@ -748,14 +749,16 @@ function onScreenOrientationChange() {
     box.innerHTML = '<div style="padding:10px;color:#888;font-size:11px;">⏳ Buscando...</div>';
     box.style.display = 'block';
 
-    Promise.all([
-        searchNominatim(q).catch(function() { return []; }),
-        searchIphan(q).catch(function() { return []; })
-    ]).then(function(results) {
-        var nominatimRes = results[0];
-        var iphanRes     = results[1];
-        renderMixedResults(nominatimRes, iphanRes);
-    });
+	Promise.all([
+		searchNominatim(q).catch(function() { return []; }),
+		searchIphan(q).catch(function() { return []; }),
+		searchEmpreendimentos(q).catch(function() { return []; })
+	]).then(function(results) {
+		var nominatimRes      = results[0];
+		var iphanRes          = results[1];
+		var empreendimentosRes = results[2];
+		renderMixedResults(nominatimRes, iphanRes, empreendimentosRes);
+	});
 }
 
 // ===== Busca Nominatim (endereços) =====
@@ -764,13 +767,19 @@ function searchNominatim(q) {
         .then(function(r) { return r.json(); });
 }
 
-// ===== Busca IPHAN GeoServer (sítios + bens materiais) =====
+// ===== Busca IPHAN GeoServer (sítios + bens materiais + empreendimentos) =====
 var IPHAN_SEARCH_LAYERS = [
     { layer: 'SICG:tg_bem_classificacao', workspace: 'SICG', geomType: 'point'   },
     { layer: 'SICG:bem_poligono',          workspace: 'SICG', geomType: 'polygon' },
     { layer: 'SICG:sitios',                workspace: 'SICG', geomType: 'point'   },
     { layer: 'SICG:sitios_pol',            workspace: 'SICG', geomType: 'polygon' }
 ];
+
+// ===== Config da busca de Empreendimentos =====
+var DBGEO_EMPREENDIMENTOS_LAYER = {
+    layer: 'DBGEO:Empreendimentos',
+    workspace: 'DBGEO'
+};
 
 function searchIphan(term) {
     var termSafe = term.replace(/'/g, "''");
@@ -807,6 +816,42 @@ function searchIphan(term) {
     });
 }
 
+// ===== Busca em DBGEO:Empreendimentos =====
+function searchEmpreendimentos(term) {
+    var termSafe = term.replace(/'/g, "''");
+    var termLower = termSafe.toLowerCase();
+
+    // Detecta se é número puro (busca por ID) ou texto (nome/processo/empreendedor)
+    var soNumero = /^\d+$/.test(termSafe);
+    var pareceProcesso = /\d{5}\.\d{6}\/\d{4}-\d{2}/.test(termSafe);
+
+    var cql;
+    if (soNumero) {
+        // Busca por ID exato OU como parte do processo
+        cql = "id = " + termSafe +
+              " OR processo LIKE '%" + termSafe + "%'";
+    } else if (pareceProcesso) {
+        // Busca exata por número SEI
+        cql = "processo = '" + termSafe + "'";
+    } else {
+        // Busca textual em nome do empreendimento E razão social
+        cql = "strToLowerCase(projeto) LIKE '%" + termLower + "%'" +
+              " OR strToLowerCase(empreendedor) LIKE '%" + termLower + "%'";
+    }
+
+    var wfs = 'https://geoserver.iphan.gov.br/geoserver/' + DBGEO_EMPREENDIMENTOS_LAYER.workspace + '/ows' +
+        '?service=WFS&version=2.0.0&request=GetFeature' +
+        '&typeNames=' + DBGEO_EMPREENDIMENTOS_LAYER.layer +
+        '&outputFormat=application/json' +
+        '&srsName=EPSG:4326&count=20' +
+        '&CQL_FILTER=' + encodeURIComponent(cql);
+    var url = PROXY + encodeURIComponent(wfs);
+
+    return fetch(url).then(function(r) { return r.json(); }).then(function(gj) {
+        return gj.features || [];
+    }).catch(function() { return []; });
+}
+
 // ===== Render misto =====
 var UF_MAP_VPGEO = {
     AC:'Acre',AL:'Alagoas',AP:'Amapá',AM:'Amazonas',BA:'Bahia',CE:'Ceará',
@@ -817,16 +862,58 @@ var UF_MAP_VPGEO = {
     RR:'Roraima',SC:'Santa Catarina',SP:'São Paulo',SE:'Sergipe',TO:'Tocantins'
 };
 
-function renderMixedResults(nominatimRes, iphanRes) {
+// ===== Ir para Empreendimento (FCA) =====
+function goToEmpreendimento(feature) {
+    if (_iphanHighlight) map.removeLayer(_iphanHighlight);
+    _iphanHighlight = L.geoJSON(feature, {
+        style: { color: '#1565c0', weight: 3, fillColor: '#1565c0', fillOpacity: 0.25 },
+        pointToLayer: function(f, ll) {
+            return L.circleMarker(ll, {
+                radius: 12, color: '#1565c0', weight: 3,
+                fillColor: '#1565c0', fillOpacity: 0.5
+            });
+        }
+    }).addTo(map);
+
+    var p = feature.properties;
+    var html =
+        '<div style="font-size:12px;max-width:280px;max-height:50vh;overflow-y:auto;padding-right:4px;">' +
+        '<div style="font-weight:700;font-size:13px;color:#1565c0;margin-bottom:6px;position:sticky;top:0;background:white;padding-bottom:4px;border-bottom:1px solid #eee;">🏗️ ' +
+        (p.projeto || 'Sem nome') + '</div>' +
+        '<b>Processo SEI:</b> ' + (p.processo || '-') + '<br>' +
+        '<b>Ano:</b> ' + (p.ano || '-') + '<br>' +
+        '<b>ID:</b> ' + (p.id || '-') + '<br>' +
+        '<b>Empreendedor:</b> ' + (p.empreendedor || '-') + '<br>' +
+        '<b>Tipo:</b> ' + (p.tipo_text || '-') +
+        (p.tipo_in ? ' (Anexo II IN 06/2025: tipo ' + p.tipo_in + ')' : '') + '<br>' +
+        '<b>UF:</b> ' + (p.unidade || '-') +
+        (UF_MAP_VPGEO[p.unidade] ? ' (' + UF_MAP_VPGEO[p.unidade] + ')' : '') + '<br>' +
+        (p.area_ha ? '<b>Área:</b> ' + Number(p.area_ha).toFixed(2) + ' ha<br>' : '') +
+        (p.nivel ? '<b>Nível indicado:</b> ' + p.nivel + '<br>' : '') +
+        '<br><button onclick="clearIphanHighlight()" style="margin-top:6px;background:#1565c0;color:white;border:none;border-radius:4px;padding:4px 8px;font-size:10px;cursor:pointer;">Remover destaque</button>' +
+        '</div>';
+    _iphanHighlight.bindPopup(html, { maxWidth: 320, maxHeight: 400, autoPan: true }).openPopup();
+
+    var b = _iphanHighlight.getBounds();
+    if (b.isValid()) map.fitBounds(b, { maxZoom: 15 });
+}
+
+// ===== Ir para feição IPHAN (zoom + destaque + popup) =====
+var _iphanHighlight = null;
+function renderMixedResults(nominatimRes, iphanRes, empreendimentosRes) {
     var box = document.getElementById('searchResults');
     box.innerHTML = '';
 
-    if ((!nominatimRes || nominatimRes.length === 0) && (!iphanRes || iphanRes.length === 0)) {
+    var total = (nominatimRes ? nominatimRes.length : 0) +
+                (iphanRes ? iphanRes.length : 0) +
+                (empreendimentosRes ? empreendimentosRes.length : 0);
+
+    if (total === 0) {
         box.innerHTML = '<div style="padding:10px;color:#999;font-size:11px;">Nenhum resultado encontrado.</div>';
         return;
     }
 
-    // Seção IPHAN (sítios + bens) — vem primeiro pois é o foco
+    // ===== IPHAN =====
     if (iphanRes && iphanRes.length) {
         iphanRes.sort(function(a, b) {
             var aArq = (a.properties.ds_natureza || '').indexOf('Arqueol') >= 0 ? 0 : 1;
@@ -836,7 +923,7 @@ function renderMixedResults(nominatimRes, iphanRes) {
         });
         var hdr1 = document.createElement('div');
         hdr1.style.cssText = 'padding:5px 10px;background:#fef3f3;font-size:10px;font-weight:700;color:#5a0a0a;border-bottom:1px solid #f0d0d0;';
-        hdr1.textContent = '⛏️🏛️ SÍTIOS E BENS (IPHAN) — ' + iphanRes.length;
+        hdr1.textContent = 'SITIOS E BENS (IPHAN) - ' + iphanRes.length;
         box.appendChild(hdr1);
         iphanRes.slice(0, 30).forEach(function(f) {
             var p = f.properties;
@@ -857,12 +944,41 @@ function renderMixedResults(nominatimRes, iphanRes) {
         });
     }
 
-    // Seção Nominatim (endereços/locais)
-    if (nominatimRes && nominatimRes.length) {
+    // ===== EMPREENDIMENTOS =====
+    if (empreendimentosRes && empreendimentosRes.length) {
+        empreendimentosRes.sort(function(a, b) {
+            return (b.properties.ano || 0) - (a.properties.ano || 0);
+        });
         var hdr2 = document.createElement('div');
-        hdr2.style.cssText = 'padding:5px 10px;background:#f0f7ff;font-size:10px;font-weight:700;color:#1565c0;border-bottom:1px solid #d0e0f0;';
-        hdr2.textContent = '🗺️ LOCAIS (OpenStreetMap) — ' + nominatimRes.length;
+        hdr2.style.cssText = 'padding:5px 10px;background:#e8f1fc;font-size:10px;font-weight:700;color:#1565c0;border-bottom:1px solid #c5dcf2;';
+        hdr2.textContent = 'EMPREENDIMENTOS - FCA (IPHAN) - ' + empreendimentosRes.length;
         box.appendChild(hdr2);
+        empreendimentosRes.slice(0, 30).forEach(function(f) {
+            var p = f.properties;
+            var name = p.projeto || 'Sem nome';
+            var processo = p.processo || '';
+            var uf = p.unidade || '';
+            var tipo = p.tipo_text || '';
+            var ano = p.ano || '';
+            var div = document.createElement('div');
+            div.className = 'search-result-item';
+            div.innerHTML =
+                '<div style="font-weight:600;font-size:12px;color:#222;">🏗️ ' + name + '</div>' +
+                '<div style="font-size:10px;color:#666;">' + tipo +
+                (ano ? ' • ' + ano : '') +
+                (uf ? ' • ' + uf : '') +
+                (processo ? ' • SEI ' + processo : '') + '</div>';
+            div.onclick = function() { goToEmpreendimento(f); box.style.display = 'none'; };
+            box.appendChild(div);
+        });
+    }
+
+    // ===== NOMINATIM =====
+    if (nominatimRes && nominatimRes.length) {
+        var hdr3 = document.createElement('div');
+        hdr3.style.cssText = 'padding:5px 10px;background:#f0f7ff;font-size:10px;font-weight:700;color:#388e3c;border-bottom:1px solid #d0e0f0;';
+        hdr3.textContent = 'LOCAIS (OpenStreetMap) - ' + nominatimRes.length;
+        box.appendChild(hdr3);
         nominatimRes.forEach(function(item) {
             var div = document.createElement('div');
             div.className = 'search-result-item';
@@ -877,9 +993,6 @@ function renderMixedResults(nominatimRes, iphanRes) {
 
     box.style.display = 'block';
 }
-
-// ===== Ir para feição IPHAN (zoom + destaque + popup) =====
-var _iphanHighlight = null;
 function goToIphanFeature(feature) {
     if (_iphanHighlight) map.removeLayer(_iphanHighlight);
     _iphanHighlight = L.geoJSON(feature, {
