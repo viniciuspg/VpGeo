@@ -722,6 +722,15 @@ function onScreenOrientationChange() {
 
         function toggleSearch() {
             var p = document.getElementById('searchPanel');
+            var input = document.getElementById('searchInput');
+            
+            // Se a caixa está aberta E tem texto → executa a busca
+            if (p.classList.contains('open') && input.value.trim() !== '') {
+                doSearch();
+                return;
+            }
+            
+            // Senão, alterna abrir/fechar (comportamento original)
             if (p.classList.contains('open')) {
                 p.classList.remove('open');
             } else {
@@ -729,9 +738,10 @@ function onScreenOrientationChange() {
                 var rect = btn.getBoundingClientRect();
                 p.style.top = rect.top + 'px';
                 p.classList.add('open');
-                document.getElementById('searchInput').focus();
+                input.focus();
             }
         }
+
         var searchMarker = null;
         document.getElementById('searchInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
 
