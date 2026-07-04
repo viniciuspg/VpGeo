@@ -122,7 +122,46 @@
             .legend-toggle { bottom: 24px; left: 6px; font-size: 10px; padding: 4px 6px; }
             .leaflet-control-layers { max-height: 70vh; font-size: 11px; }
         }
-    
+
+			/* ==== Copiar coordenadas ==== */
+.coords, .mobile-coords {
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    user-select: none;
+}
+.coords:hover, .mobile-coords:hover {
+    background: #5a0a0a !important;
+    color: white !important;
+}
+.coords.copied, .mobile-coords.copied {
+    background: #4caf50 !important;
+    color: white !important;
+}
+
+/* Toast (notificação flutuante) */
+#coordToast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(0,0,0,0.85);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+    white-space: nowrap;
+}
+#coordToast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+			
 	</style>
 </head>
 <body>
@@ -138,7 +177,7 @@
             <span class="wms-status"><span class="status-dot"></span> WMS: geoserver.iphan.gov.br</span>
             <span class="wms-status"><span class="status-dot"></span> 9 camadas + Bens Imateriais (BCR) | Clique no mapa para consultar</span>
         </div>
-        <div class="coords" id="coords">Lat: -15.0000 | Lng: -50.0000 | Zoom: 5</div>
+        <div class="coords" id="coords" title="Clique para copiar as coordenadas">Lat: -15.0000 | Lng: -50.0000 | Zoom: 5</div>
     </div>
     <div id="map"><div class="crosshair"></div></div>
 	<div class="search-panel" id="searchPanel">
@@ -146,7 +185,7 @@
         <button class="search-go" onclick="doSearch()">&#128269;</button>
         <div class="search-results" id="searchResults"></div>
     </div>
-    <div class="mobile-coords" id="mobileCoords">Lat: -15.00 | Lng: -50.00 | Zoom: 5</div>
+    <div class="mobile-coords" id="mobileCoords" title="Toque para copiar as coordenadas">Lat: -15.00 | Lng: -50.00 | Zoom: 5</div>
     <div class="report-panel" id="reportPanel">
         <h3>Reportar Bem <button class="close-btn" onclick="closeReport()">&#10005;</button></h3>
         <div class="report-note"><strong>Bens acautelados em ambito federal (IPHAN):</strong><br>&#8226; <strong>Arqueologicos:</strong> Todos os sitios arqueologicos sao protegidos pela Uniao (Lei 3.924/1961), independentemente de estarem cadastrados.<br>&#8226; <strong>Tombados:</strong> Apenas bens tombados pelo IPHAN (nivel federal). Tombamentos estaduais ou municipais nao estao incluidos.<br>&#8226; <strong>Imateriais:</strong> Apenas bens registrados pelo IPHAN como patrimonio imaterial do Brasil.</div>
@@ -375,7 +414,82 @@
         }
         map.on('mousemove', function(e) { updateCoords(e.latlng.lat, e.latlng.lng); });
         map.on('zoomend moveend', function() { var c = map.getCenter(); updateCoords(c.lat, c.lng); });
+// ==== Copiar coordenadas ====
+var _lastLat = -15.0, _lastLng = -50.0;
 
+// Interceptar updateCoords para guardar valores atuais
+var _origUpdateCoords = updateCoords;
+updateCoords = function(lat, lng) {
+    _lastLat = lat;
+    _lastLng = lng;
+    _origUpdateCoords(lat, lng);
+};
+
+function copyCoordinatesToClipboard() {
+    var text = _lastLat.toFixed(6) + ', ' + _lastLng.toFixed(6);
+    
+    // Tenta usar clipboard API moderna
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+            showCoordToast('📋 Copiado: ' + text);
+            flashCoordsElements();
+        }).catch(function() {
+            fallbackCopy(text);
+        });
+    } else {
+        fallbackCopy(text);
+    }
+}
+
+function fallbackCopy(text) {
+    // Fallback para navegadores antigos
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+        document.execCommand('copy');
+        showCoordToast('📋 Copiado: ' + text);
+        flashCoordsElements();
+    } catch (e) {
+        showCoordToast('⚠️ Erro ao copiar');
+    }
+    document.body.removeChild(ta);
+}
+
+function showCoordToast(msg) {
+    var toast = document.getElementById('coordToast');
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(function() {
+        toast.classList.remove('show');
+    }, 2000);
+}
+
+function flashCoordsElements() {
+    ['coords', 'mobileCoords'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+            el.classList.add('copied');
+            setTimeout(function() { el.classList.remove('copied'); }, 700);
+        }
+    });
+}
+
+// Vincula os eventos de clique
+['coords', 'mobileCoords'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('click', function(e) {
+            e.stopPropagation();
+            copyCoordinatesToClipboard();
+        });
+    }
+});
         // === GPS + COMPASS ===
         var gpsOn = false, gpsWid = null, gpsMk = null, gpsCi = null;
 		var gpsOn = false, gpsFollow = false, gpsWid = null, gpsMk = null, gpsCi = null;
@@ -1120,5 +1234,6 @@ function goToCoords(lat, lng) {
                 .catch(function(err) { console.log('[PWA] Erro SW:', err); });
         }
     </script>
+<div id="coordToast">📋 Copiado!</div>
 </body>
 </html>
