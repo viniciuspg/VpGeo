@@ -93,7 +93,35 @@
         .gfi-btn:hover { opacity: 0.85; }
         .gfi-btn-sicg { background: #5a0a0a; }
         .gfi-btn-dbgeo { background: #1565c0; }
-        .gfi-coords { font-family: Consolas, monospace; font-size: 10px; color: #666; background: #f5f5f5; padding: 3px 6px; border-radius: 4px; text-align: center; margin-bottom: 4px; }
+        .gfi-coords { 
+		    font-family: Consolas, monospace; 
+		    font-size: 10px; 
+		    color: #666; 
+		    background: #f5f5f5; 
+		    padding: 3px 6px; 
+		    border-radius: 4px; 
+		    text-align: center; 
+		    margin-bottom: 4px; 
+		    cursor: pointer;
+		    transition: background 0.2s, color 0.2s;
+		    user-select: none;
+		}
+		.gfi-coords:hover { 
+		    background: #5a0a0a; 
+		    color: white; 
+		}
+		.gfi-coords.copied { 
+		    background: #4caf50 !important; 
+		    color: white !important; 
+		}
+		.gfi-coords::after {
+		    content: " 📋";
+		    font-size: 10px;
+		    opacity: 0.5;
+		}
+		.gfi-coords:hover::after {
+		    opacity: 1;
+		}
         .gfi-note { font-size: 9px; color: #999; line-height: 1.3; margin-top: 4px; padding-top: 4px; border-top: 1px solid #eee; }
         .legend-panel { position: absolute; bottom: 30px; left: 10px; background: rgba(255,255,255,0.96); padding: 8px 12px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); z-index: 999; max-width: 240px; max-height: 350px; overflow-y: auto; font-size: 11px; border-left: 3px solid #5a0a0a; display: none; }
         .legend-panel h3 { font-size: 12px; color: #5a0a0a; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
@@ -670,6 +698,45 @@ function onScreenOrientationChange() {
         function openGfiSICG() { if (lastGfiSICG) window.open(lastGfiSICG, '_blank'); }
         function openGfiDBGEO() { if (lastGfiDBGEO) window.open(lastGfiDBGEO, '_blank'); }
 
+		// ==== Copiar coordenadas do popup de GFI ====
+function copyGfiCoords(el, lat, lng) {
+    var text = lat + ', ' + lng;
+    
+    function feedback() {
+        el.classList.add('copied');
+        var original = el.innerHTML;
+        el.innerHTML = '✓ Copiado: ' + text;
+        setTimeout(function() {
+            el.classList.remove('copied');
+            el.innerHTML = original;
+        }, 1500);
+    }
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(feedback).catch(function() {
+            fallbackCopyGfi(text, feedback);
+        });
+    } else {
+        fallbackCopyGfi(text, feedback);
+    }
+}
+
+function fallbackCopyGfi(text, callback) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+        document.execCommand('copy');
+        callback();
+    } catch (e) {
+        alert('Erro ao copiar. Copie manualmente: ' + text);
+    }
+    document.body.removeChild(ta);
+}
+		
         map.on('click', function(e) {
 			// Se painel de camadas aberto, fecha e nao abre GFI
             if (layersExpanded) {
@@ -684,7 +751,7 @@ function onScreenOrientationChange() {
             var lSICG = 'SICG:sitios,SICG:sitios_pol,SICG:tg_bem_classificacao,SICG:bem_poligono';
             var lDBGEO = 'DBGEO:Empreendimentos';
 
-            var coordsHtml = '<div class="gfi-coords">Lat: ' + e.latlng.lat.toFixed(6) + ' | Lng: ' + e.latlng.lng.toFixed(6) + '</div>';
+            var latStr = e.latlng.lat.toFixed(6); var lngStr = e.latlng.lng.toFixed(6); var coordsHtml = '<div class="gfi-coords" title="Clique para copiar" onclick="copyGfiCoords(this, \'' + latStr + '\', \'' + lngStr + '\')">Lat: ' + latStr + ' | Lng: ' + lngStr + '</div>';
 
             var jsonSICG = buildGfiUrl(WMS_SICG_RAW, lSICG, bbox, sz, pt, 'application/json');
             var jsonDBGEO = buildGfiUrl(WMS_DBGEO_RAW, lDBGEO, bbox, sz, pt, 'application/json');
