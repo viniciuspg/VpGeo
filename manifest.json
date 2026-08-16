@@ -1,7 +1,7 @@
 {
   "name": "VpGeo — Visualizador Geoespacial do Patrimônio Cultural Brasileiro",
   "short_name": "VpGeo",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Visualizador Geoespacial do Patrimônio Cultural Brasileiro — dados oficiais do IPHAN. Busca unificada por sítios arqueológicos, bens materiais, empreendimentos FCA, endereços e coordenadas. GPS com bússola, camadas WMS/WFS.",
   "start_url": "./index.html",
   "scope": "./",
