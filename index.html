@@ -158,14 +158,14 @@
     <div class="header">
         <h1>VpGeo — Patrimônio Cultural Brasileiro</h1>
         <div class="badges">
-            <span class="badge badge-v">v1.5</span>
+            <span class="badge badge-v">v1.6</span>
             <span class="badge badge-proto">Prot&#243;tipo</span>
         </div>
     </div>
     <div class="info-bar">
         <div class="info-left">
             <span class="wms-status"><span class="status-dot"></span> WMS: geoserver.iphan.gov.br</span>
-            <span class="wms-status"><span class="status-dot"></span> 9 camadas + Bens Imateriais (BCR) | Clique no mapa para consultar</span>
+            <span class="wms-status"><span class="status-dot"></span> 11 camadas + Bens Imateriais (BCR) | Clique no mapa para consultar</span>
         </div>
         <div class="coords" id="coords">Lat: -15.0000 | Lng: -50.0000 | Zoom: 5</div>
     </div>
@@ -216,10 +216,11 @@
 					  <li><strong>Nome de sitio ou bem</strong> (ex: <em>Garopaba do Sul I</em>, <em>Ponte Hercílio Luz</em>)</li>
 					  <li><strong>Codigo IPHAN</strong> com ou sem hifens (ex: <em>SC-4208807-BA-ST-00008</em> ou <em>SC4208807BAST00008</em>)</li>
 					  <li><strong>Empreendimento FCA</strong> por nome, razao social, ID ou processo SEI (exemplos ficticios: <em>UHE Rio Fictício</em>, <em>99999</em> ou <em>01000.000000/0000-00</em>)</li>
+					  <li><strong>Empreendimento SAIP</strong> por nome, ID SAIP, processo SEI, tipo ou municipio (exemplos ficticios: <em>PCH Rio Exemplo</em>, <em>999/2099</em> ou <em>01000.000000/2099-00</em>). Quando disponíveis, ADA e AID são reunidas em um único resultado.</li>
 					  <li><strong>Endereco ou cidade</strong> (ex: <em>Florianopolis</em>)</li>
 					  <li><strong>Coordenadas</strong> (ex: <em>-27.57, -48.52</em>)</li>
 					</ul>
-					<p style="margin-top:4px;">Pressione Enter. Os resultados sao exibidos em secoes separadas: <strong>Sitios e Bens (IPHAN)</strong>, <strong>Empreendimentos (FCA)</strong> e <strong>Locais (OpenStreetMap)</strong>.</p>
+					<p style="margin-top:4px;">Pressione Enter. Os resultados sao exibidos em secoes separadas: <strong>Sitios e Bens (IPHAN)</strong>, <strong>Empreendimentos FCA (IPHAN)</strong>, <strong>Empreendimentos SAIP</strong> e <strong>Locais (OpenStreetMap)</strong>.</p>
 				</div>
                 <hr class="guia-divider">
                 <div class="guia-section">
@@ -237,12 +238,12 @@
                 <hr class="guia-divider">
                 <div class="guia-section">
                     <h3>&#128203; Camadas</h3>
-                    <p>Clique no icone de camadas (canto superior direito) para trocar o mapa base (Satelite, OSM, Topografico, Ruas, GMRT) e ativar/desativar camadas tematicas: sitios arqueologicos, bens materiais, bens imateriais (BCR), empreendimentos e mais.</p>
+                    <p>Clique no icone de camadas (canto superior direito) para trocar o mapa base (Satelite, OSM, Topografico, Ruas, GMRT) e ativar/desativar camadas tematicas: sitios arqueologicos, bens materiais, bens imateriais (BCR), empreendimentos FCA, Área Diretamente Afetada (ADA) do SAIP, Área de Influência Direta (AID) do SAIP e mais.</p>
                 </div>
                 <hr class="guia-divider">
                 <div class="guia-section">
                     <h3>&#128070; Consultar Feicoes</h3>
-                    <p>Clique em qualquer ponto do mapa para consultar feicoes (sitios, bens, empreendimentos). Um popup mostrara os dados encontrados. Para bens imateriais, todos os poligonos sobrepostos serao listados.</p>
+                    <p>Clique em qualquer ponto do mapa para consultar feicoes: sitios arqueologicos, bens materiais, empreendimentos FCA e áreas ADA/AID do SAIP. Um popup mostrara os dados encontrados. Para bens imateriais, todos os poligonos sobrepostos serao listados.</p>
                 </div>
                 <hr class="guia-divider">
                 <div class="guia-section">
@@ -280,6 +281,7 @@
 
         var WMS_SICG_RAW = 'https://geoserver.iphan.gov.br/geoserver/SICG/wms';
         var WMS_DBGEO_RAW = 'https://geoserver.iphan.gov.br/geoserver/DBGEO/wms';
+		var WMS_FCA_RAW = 'https://geoserver.iphan.gov.br/geoserver/fca/wms';
 
         function px(url) { return useProxy ? PROXY + encodeURIComponent(url) : url; }
 
@@ -298,15 +300,28 @@
             { title: 'Bens Materiais \u2014 Pol\u00edgonos', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:bem_poligono' },
             { title: 'Hidrografia', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_hidrografia' },
             { title: 'Empreendimentos (FCA)', url: WMS_DBGEO_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=Empreendimentos' },
-            { title: 'Bens Imateriais (BCR)', url: '' }
+            { title: 'Bens Imateriais (BCR)', url: '' },
+			{ title: 'Área Diretamente Afetada (ADA) — SAIP', url: '', fillColor: 'rgba(211,47,47,0.25)', borderColor: '#d32f2f', description: 'ADA — polígono SAIP' },
+			{ title: 'Área de Influência Direta (AID) — SAIP', url: '', fillColor: 'rgba(66,165,245,0.15)', borderColor: '#1565c0', description: 'AID — polígono SAIP' }
         ];
         var lc = document.getElementById('legendContent');
         legendEntries.forEach(function(e) {
             if (e.url) {
                 lc.innerHTML += '<div class="legend-item"><div class="legend-item-title">' + e.title + '</div><img src="' + px(e.url) + '" onerror="this.style.display=\'none\'"></div>';
             } else {
-                lc.innerHTML += '<div class="legend-item"><div class="legend-item-title">' + e.title + '</div><div style="display:flex;align-items:center;gap:6px;margin-top:2px;"><div style="width:20px;height:14px;background:rgba(137,177,255,0.3);border:1px solid #5a7fbf;border-radius:2px;"></div><span style="font-size:10px;color:#666;">Poligonos (fonte: BCR/IPHAN)</span></div></div>';
-            }
+    var fillColor = e.fillColor || 'rgba(137,177,255,0.3)';
+    var borderColor = e.borderColor || '#5a7fbf';
+    var description = e.description || 'Poligonos (fonte: BCR/IPHAN)';
+
+    lc.innerHTML +=
+        '<div class="legend-item">' +
+            '<div class="legend-item-title">' + e.title + '</div>' +
+            '<div style="display:flex;align-items:center;gap:6px;margin-top:2px;">' +
+                '<div style="width:20px;height:14px;background:' + fillColor + ';border:2px solid ' + borderColor + ';border-radius:2px;"></div>' +
+                '<span style="font-size:10px;color:#666;">' + description + '</span>' +
+            '</div>' +
+        '</div>';
+}
         });
 
         var map = L.map('map', { center: [-15.0, -50.0], zoom: 5, maxZoom: 19, zoomControl: true });
@@ -336,6 +351,65 @@
 		var preSt = wms(WMS_SICG_RAW,'SICG:tg_pre_setor','polygon'), hidro = wms(WMS_SICG_RAW,'SICG:tg_hidrografia','SICG:hidrografia_sicg');
 		var nim17 = wms(WMS_SICG_RAW,'SICG:Mapa_Nimuendaju_IPHAN_2017','raster');
         var empreend = wmsProxy(WMS_DBGEO_RAW, { layers:'DBGEO:Empreendimentos', styles:'DBGEO:fca', format:'image/png', transparent:true, version:'1.1.1', srs: 'EPSG:4326', maxZoom:19, attribution:'IPHAN/DBGEO' });
+
+        // === EMPREENDIMENTOS SAIP: ADA E AID ===
+        var adaSaipSld =
+            '<?xml version="1.0" encoding="UTF-8"?>' +
+            '<StyledLayerDescriptor version="1.0.0" ' +
+            'xmlns="http://www.opengis.net/sld" ' +
+            'xmlns:ogc="http://www.opengis.net/ogc" ' +
+            'xmlns:xlink="http://www.w3.org/1999/xlink" ' +
+            'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+                '<NamedLayer>' +
+                    '<Name>fca:ada_saip_teste</Name>' +
+                    '<UserStyle>' +
+                        '<Title>ADA SAIP vermelha</Title>' +
+                        '<FeatureTypeStyle>' +
+                            '<Rule>' +
+                                '<PolygonSymbolizer>' +
+                                    '<Fill>' +
+                                        '<CssParameter name="fill">#d32f2f</CssParameter>' +
+                                        '<CssParameter name="fill-opacity">0.25</CssParameter>' +
+                                    '</Fill>' +
+                                    '<Stroke>' +
+                                        '<CssParameter name="stroke">#d32f2f</CssParameter>' +
+                                        '<CssParameter name="stroke-width">2</CssParameter>' +
+                                    '</Stroke>' +
+                                '</PolygonSymbolizer>' +
+                            '</Rule>' +
+                        '</FeatureTypeStyle>' +
+                    '</UserStyle>' +
+                '</NamedLayer>' +
+            '</StyledLayerDescriptor>';
+
+        var adaSaip = wmsProxy(
+            'https://geoserver.iphan.gov.br/geoserver/fca/wms',
+            {
+                layers: 'fca:ada_saip_teste',
+                styles: '',
+                sld_body: adaSaipSld,
+                format: 'image/png',
+                transparent: true,
+                version: '1.1.1',
+                srs: 'EPSG:4326',
+                maxZoom: 19,
+                attribution: 'SAIP/IPHAN'
+            }
+        );
+
+        var aidSaip = wmsProxy(
+            'https://geoserver.iphan.gov.br/geoserver/fca/wms',
+            {
+                layers: 'fca:aid_saip',
+                styles: '',
+                format: 'image/png',
+                transparent: true,
+                version: '1.1.1',
+                srs: 'EPSG:4326',
+                maxZoom: 19,
+                attribution: 'SAIP/IPHAN'
+            }
+        );
 
 		// === BENS IMATERIAIS (BCR) ===
         var bensImatStyle = { fillColor: '#89B1FF', fillOpacity: 0.3, color: '#5a7fbf', weight: 1, opacity: 0.6 };
@@ -395,6 +469,8 @@
               "Bens Imateriais (BCR)": bensImatLayer,
               "Pre Setor": preSt,
               "Hidrografia": hidro, "Nimuendaju 2017": nim17,
+			  "Área Diretamente Afetada (ADA) — SAIP": adaSaip,
+              "Área de Influência Direta (AID) — SAIP": aidSaip,
               "Empreendimentos (FCA)": empreend,
               "Municipios": mun },
             { collapsed: true, position: 'topright' }
@@ -644,16 +720,21 @@ function fallbackCopyGfi(text, callback) {
             var bbox = b.getWest()+','+b.getSouth()+','+b.getEast()+','+b.getNorth();
             var lSICG = 'SICG:sitios,SICG:sitios_pol,SICG:tg_bem_classificacao,SICG:bem_poligono';
             var lDBGEO = 'DBGEO:Empreendimentos';
-
+			var lFCA = 'fca:ada_saip_teste,fca:aid_saip';
             var latStr = e.latlng.lat.toFixed(6); var lngStr = e.latlng.lng.toFixed(6); var coordsHtml = '<div class="gfi-coords" title="Clique para copiar" onclick="copyGfiCoords(this, \'' + latStr + '\', \'' + lngStr + '\')">Lat: ' + latStr + ' | Lng: ' + lngStr + '</div>';
 
-            var jsonSICG = buildGfiUrl(WMS_SICG_RAW, lSICG, bbox, sz, pt, 'application/json');
-            var jsonDBGEO = buildGfiUrl(WMS_DBGEO_RAW, lDBGEO, bbox, sz, pt, 'application/json');
-            var htmlSICG = buildGfiUrl(WMS_SICG_RAW, lSICG, bbox, sz, pt, 'text/html');
-            var htmlDBGEO = buildGfiUrl(WMS_DBGEO_RAW, lDBGEO, bbox, sz, pt, 'text/html');
+			var jsonSICG = buildGfiUrl(WMS_SICG_RAW, lSICG, bbox, sz, pt, 'application/json');
+			var jsonDBGEO = buildGfiUrl(WMS_DBGEO_RAW, lDBGEO, bbox, sz, pt, 'application/json');
+			var jsonFCA = buildGfiUrl(WMS_FCA_RAW, lFCA, bbox, sz, pt, 'application/json');
+
+			var htmlSICG = buildGfiUrl(WMS_SICG_RAW, lSICG, bbox, sz, pt, 'text/html');
+			var htmlDBGEO = buildGfiUrl(WMS_DBGEO_RAW, lDBGEO, bbox, sz, pt, 'text/html');
+			var htmlFCA = buildGfiUrl(WMS_FCA_RAW, lFCA, bbox, sz, pt, 'text/html');
 
             var fetchSICG = useProxy ? PROXY + encodeURIComponent(jsonSICG) : jsonSICG;
             var fetchDBGEO = useProxy ? PROXY + encodeURIComponent(jsonDBGEO) : jsonDBGEO;
+			var fetchFCA = useProxy ? PROXY + encodeURIComponent(jsonFCA) : jsonFCA;
+			
             lastGfiSICG = useProxy ? PROXY + encodeURIComponent(htmlSICG) : htmlSICG;
             lastGfiDBGEO = useProxy ? PROXY + encodeURIComponent(htmlDBGEO) : htmlDBGEO;
 
@@ -662,14 +743,17 @@ function fallbackCopyGfi(text, callback) {
                 .setContent('<div style="min-width:240px;">' + coordsHtml + '<div class="gfi-loading">&#9683; Consultando...</div></div>')
                 .openOn(map);
 
-            Promise.all([
-                fetch(fetchSICG).then(function(r) { return r.json(); }).catch(function() { return null; }),
-                fetch(fetchDBGEO).then(function(r) { return r.json(); }).catch(function() { return null; })
-            ]).then(function(results) {
-                var sicgData = results[0], dbgeoData = results[1];
+			Promise.all([
+				fetch(fetchSICG).then(function(r) { return r.json(); }).catch(function() { return null; }),
+				fetch(fetchDBGEO).then(function(r) { return r.json(); }).catch(function() { return null; }),
+				fetch(fetchFCA).then(function(r) { return r.json(); }).catch(function() { return null; })
+			]).then(function(results) {
+				var sicgData = results[0];
+				var dbgeoData = results[1];
+				var fcaData = results[2];
 				
-                // Se ambos falharam (CORS local), mostra botoes
-                if (sicgData === null && dbgeoData === null) {
+                // Se todas as consultas falharam, mostra os botoes alternativos
+                if (sicgData === null && dbgeoData === null && fcaData === null) {
                     popup.setContent(
                         '<div style="min-width:220px;">' + coordsHtml +
                         '<button class="gfi-fallback-btn" style="background:#5a0a0a;" onclick="openGfiSICG()">SICG: Sitios e Bens</button>' +
@@ -679,17 +763,23 @@ function fallbackCopyGfi(text, callback) {
                     popup.update();
                     return;
                 }
-                var sicgHtml = sicgData ? formatFeatures(sicgData, '#5a0a0a') : '';
-                var dbgeoHtml = dbgeoData ? formatFeatures(dbgeoData, '#1565c0') : '';
-                var hasSICG = sicgHtml.length > 0, hasDBGEO = dbgeoHtml.length > 0;
+				var sicgHtml = sicgData ? formatFeatures(sicgData, '#5a0a0a') : '';
+				var dbgeoHtml = dbgeoData ? formatFeatures(dbgeoData, '#1565c0') : '';
+				var fcaHtml = fcaData ? formatFeatures(fcaData, '#e65100') : '';
 
-                var content = '<div style="min-width:240px;">' + coordsHtml;
-                if (!hasSICG && !hasDBGEO) {
-                    content += '<div class="gfi-empty">Nenhuma feicao encontrada neste ponto.</div>';
-                } else {
-                    if (hasSICG) content += '<div class="gfi-section-title" style="color:#5a0a0a;">SICG \u2014 Sitios e Bens</div>' + sicgHtml;
-                    if (hasDBGEO) content += '<div class="gfi-section-title" style="color:#1565c0;">DBGEO \u2014 Empreendimentos</div>' + dbgeoHtml;
-                }
+				var hasSICG = sicgHtml.length > 0;
+				var hasDBGEO = dbgeoHtml.length > 0;
+				var hasFCA = fcaHtml.length > 0;
+
+				var content = '<div style="min-width:240px;">' + coordsHtml;
+				
+                if (!hasSICG && !hasDBGEO && !hasFCA) {
+					content += '<div class="gfi-empty">Nenhuma feicao encontrada neste ponto.</div>';
+				} else {
+					if (hasSICG) content += '<div class="gfi-section-title" style="color:#5a0a0a;">SICG — Sitios e Bens</div>' + sicgHtml;
+					if (hasDBGEO) content += '<div class="gfi-section-title" style="color:#1565c0;">DBGEO — Empreendimentos</div>' + dbgeoHtml;
+					if (hasFCA) content += '<div class="gfi-section-title" style="color:#e65100;">SAIP — ADA e AID</div>' + fcaHtml;
+				}
                 content += '</div>';
                 popup.setContent(content);
                 popup.update();
@@ -747,7 +837,7 @@ function fallbackCopyGfi(text, callback) {
         var zB = L.control({position:'topleft'});
         zB.onAdd = function() {
             var d = L.DomUtil.create('div','leaflet-bar');
-            d.innerHTML = '<a href="#" title="Brasil" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:13px;text-decoration:none;background:white;font-weight:bold;">BR</a>';
+            d.innerHTML = '<a href="#" class="gps-btn" title="Voltar à visão geral do Brasil" style="font-size:13px;font-weight:bold;">BR</a>';
             d.onclick = function(e) { e.preventDefault(); e.stopPropagation(); map.setView([-15.0,-50.0],5); };
             L.DomEvent.disableClickPropagation(d); return d;
         };
@@ -837,12 +927,20 @@ function fallbackCopyGfi(text, callback) {
 	Promise.all([
 		searchNominatim(q).catch(function() { return []; }),
 		searchIphan(q).catch(function() { return []; }),
-		searchEmpreendimentos(q).catch(function() { return []; })
+		searchEmpreendimentos(q).catch(function() { return []; }),
+		searchSaip(q).catch(function() { return []; })
 	]).then(function(results) {
-		var nominatimRes      = results[0];
-		var iphanRes          = results[1];
+		var nominatimRes = results[0];
+		var iphanRes = results[1];
 		var empreendimentosRes = results[2];
-		renderMixedResults(nominatimRes, iphanRes, empreendimentosRes);
+		var saipRes = results[3];
+
+		renderMixedResults(
+			nominatimRes,
+			iphanRes,
+			empreendimentosRes,
+			saipRes
+		);
 	});
 }
 
@@ -865,6 +963,20 @@ var DBGEO_EMPREENDIMENTOS_LAYER = {
     layer: 'DBGEO:Empreendimentos',
     workspace: 'DBGEO'
 };
+
+// ===== Config da busca de Empreendimentos SAIP =====
+var SAIP_SEARCH_LAYERS = [
+    {
+        layer: 'fca:ada_saip_teste',
+        workspace: 'fca',
+        areaType: 'ADA'
+    },
+    {
+        layer: 'fca:aid_saip',
+        workspace: 'fca',
+        areaType: 'AID'
+    }
+];
 
 function searchIphan(term) {
     var termSafe = term.replace(/'/g, "''");
@@ -937,6 +1049,152 @@ function searchEmpreendimentos(term) {
     }).catch(function() { return []; });
 }
 
+// ===== Busca de Empreendimentos SAIP: ADA + AID =====
+function searchSaip(term) {
+    var termSafe = String(term || '')
+        .trim()
+        .replace(/'/g, "''");
+
+    var termLower = termSafe.toLowerCase();
+
+    if (!termLower) {
+        return Promise.resolve([]);
+    }
+
+    var cql =
+        "strToLowerCase(nome_empreendimento) LIKE '%" + termLower + "%'" +
+        " OR strToLowerCase(id_saip) LIKE '%" + termLower + "%'" +
+        " OR strToLowerCase(processo) LIKE '%" + termLower + "%'" +
+        " OR strToLowerCase(tipo_empreendimento) LIKE '%" + termLower + "%'" +
+        " OR strToLowerCase(municipio) LIKE '%" + termLower + "%'";
+
+    var allFeatures = [];
+
+    return Promise.all(
+        SAIP_SEARCH_LAYERS.map(function(cfg) {
+            var wfs =
+                'https://geoserver.iphan.gov.br/geoserver/' +
+                cfg.workspace +
+                '/ows' +
+                '?service=WFS' +
+                '&version=2.0.0' +
+                '&request=GetFeature' +
+                '&typeNames=' + cfg.layer +
+                '&outputFormat=application/json' +
+                '&srsName=EPSG:4326' +
+                '&count=30' +
+                '&CQL_FILTER=' + encodeURIComponent(cql);
+
+            var url = PROXY + encodeURIComponent(wfs);
+
+            return fetch(url)
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('Erro WFS SAIP: HTTP ' + response.status);
+                    }
+
+                    return response.json();
+                })
+                .then(function(geojson) {
+                    (geojson.features || []).forEach(function(feature) {
+                        feature.properties = feature.properties || {};
+                        feature.properties._saipAreaType = cfg.areaType;
+                        allFeatures.push(feature);
+                    });
+                })
+                .catch(function(error) {
+                    console.warn(
+                        'Falha na busca ' + cfg.areaType + ' SAIP:',
+                        error
+                    );
+                });
+        })
+    ).then(function() {
+        var grouped = {};
+
+        allFeatures.forEach(function(feature) {
+            var properties = feature.properties || {};
+            var key = getSaipKey(properties);
+
+            if (!grouped[key]) {
+                grouped[key] = {
+                    key: key,
+                    properties: Object.assign({}, properties),
+                    adaFeatures: [],
+                    aidFeatures: []
+                };
+            }
+
+            if (properties._saipAreaType === 'ADA') {
+                grouped[key].adaFeatures.push(feature);
+
+                grouped[key].properties = Object.assign(
+                    {},
+                    grouped[key].properties,
+                    properties
+                );
+            } else {
+                grouped[key].aidFeatures.push(feature);
+
+                Object.keys(properties).forEach(function(field) {
+                    if (
+                        grouped[key].properties[field] === null ||
+                        grouped[key].properties[field] === undefined ||
+                        grouped[key].properties[field] === ''
+                    ) {
+                        grouped[key].properties[field] = properties[field];
+                    }
+                });
+            }
+
+            if (
+                properties._saipAreaType === 'ADA' &&
+                properties.area_ada_ha !== null &&
+                properties.area_ada_ha !== undefined
+            ) {
+                grouped[key].properties.area_ada_ha =
+                    properties.area_ada_ha;
+            }
+
+            if (
+                properties._saipAreaType === 'AID' &&
+                properties.area_aid_ha !== null &&
+                properties.area_aid_ha !== undefined
+            ) {
+                grouped[key].properties.area_aid_ha =
+                    properties.area_aid_ha;
+            }
+        });
+
+        return Object.keys(grouped).map(function(key) {
+            return grouped[key];
+        });
+    });
+}
+
+// ===== Funções auxiliares da busca SAIP =====
+function normalizeSaipProcess(value) {
+    return String(value || '')
+        .replace(/[.\-\/\s]/g, '')
+        .toUpperCase();
+}
+
+function getSaipKey(properties) {
+    var idSaip = String(properties.id_saip || '').trim();
+
+    if (idSaip) {
+        return 'saip:' + idSaip.toUpperCase();
+    }
+
+    var processo = normalizeSaipProcess(properties.processo);
+
+    if (processo) {
+        return 'processo:' + processo;
+    }
+
+    return 'feature:' + String(properties.id || '');
+}
+
 // ===== Render misto =====
 var UF_MAP_VPGEO = {
     AC:'Acre',AL:'Alagoas',AP:'Amapá',AM:'Amazonas',BA:'Bahia',CE:'Ceará',
@@ -946,6 +1204,55 @@ var UF_MAP_VPGEO = {
     RN:'Rio Grande do Norte',RS:'Rio Grande do Sul',RO:'Rondônia',
     RR:'Roraima',SC:'Santa Catarina',SP:'São Paulo',SE:'Sergipe',TO:'Tocantins'
 };
+
+// ===== Funções auxiliares do popup SAIP =====
+function formatSaipDate(value) {
+    if (!value) {
+        return '';
+    }
+
+    var dataLimpa = String(value).substring(0, 10);
+    var partes = dataLimpa.split('-');
+
+    if (partes.length !== 3) {
+        return value;
+    }
+
+    return partes[2] + '/' + partes[1] + '/' + partes[0];
+}
+
+function formatSaipArea(value) {
+    if (value === null || value === undefined || value === '') {
+        return '';
+    }
+
+    var numero = Number(value);
+
+    if (!isFinite(numero)) {
+        return value;
+    }
+
+    return numero.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+function saipPopupRow(label, value) {
+    if (
+        value === null ||
+        value === undefined ||
+        String(value).trim() === ''
+    ) {
+        return '';
+    }
+
+    return '<div style="margin-bottom:3px;"><b>' +
+        label +
+        ':</b> ' +
+        value +
+        '</div>';
+}
 
 // ===== Ir para Empreendimento (FCA) =====
 function goToEmpreendimento(feature) {
@@ -983,15 +1290,163 @@ function goToEmpreendimento(feature) {
     if (b.isValid()) map.fitBounds(b, { maxZoom: 15 });
 }
 
+// ===== Ir para Empreendimento SAIP: ADA + AID =====
+function goToSaipFeature(item) {
+    if (_iphanHighlight) {
+        map.removeLayer(_iphanHighlight);
+    }
+
+    var todasFeicoes = []
+        .concat(item.aidFeatures || [])
+        .concat(item.adaFeatures || []);
+
+    _iphanHighlight = L.geoJSON(
+        {
+            type: 'FeatureCollection',
+            features: todasFeicoes
+        },
+        {
+            style: function(feature) {
+                var tipoArea =
+                    feature.properties &&
+                    feature.properties._saipAreaType;
+
+                if (tipoArea === 'ADA') {
+                    return {
+                        color: '#d32f2f',
+                        weight: 3,
+                        fillColor: '#d32f2f',
+                        fillOpacity: 0.25
+                    };
+                }
+
+                return {
+                    color: '#1565c0',
+                    weight: 3,
+                    fillColor: '#42a5f5',
+                    fillOpacity: 0.15
+                };
+            }
+        }
+    ).addTo(map);
+
+    var limites = _iphanHighlight.getBounds();
+
+    if (limites.isValid()) {
+        map.fitBounds(limites, {
+            padding: [20, 20],
+            maxZoom: 15
+        });
+    }
+
+    var p = item.properties || {};
+
+    var municipioUf = [
+        p.municipio,
+        p.uf
+    ].filter(Boolean).join('/');
+
+    var html =
+        '<div style="font-size:12px;max-width:300px;max-height:55vh;overflow-y:auto;padding-right:5px;">' +
+
+        '<div style="font-weight:700;font-size:13px;color:#e65100;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid #eee;">🏗️ ' +
+        (p.nome_empreendimento || 'Empreendimento SAIP') +
+        '</div>' +
+
+        saipPopupRow('Origem', 'SAIP') +
+        saipPopupRow('ID SAIP', p.id_saip) +
+        saipPopupRow('Processo SEI', p.processo) +
+        saipPopupRow('Ano', p.ano) +
+        saipPopupRow('Tipo de empreendimento', p.tipo_empreendimento) +
+        saipPopupRow('Item', p.item) +
+        saipPopupRow('Esfera do licenciamento', p.esfera_licenciamento_ambiental) +
+        saipPopupRow('Nível arqueológico', p.nivel_patrimonio_arqueologico) +
+        saipPopupRow('Município/UF', municipioUf) +
+        saipPopupRow('Situação', p.situacao_empreendimento) +
+
+        (
+            p.area_ada_ha !== null &&
+            p.area_ada_ha !== undefined
+                ? saipPopupRow(
+                    'Área ADA informada',
+                    formatSaipArea(p.area_ada_ha) + ' ha'
+                )
+                : ''
+        ) +
+
+        (
+            p.area_aid_ha !== null &&
+            p.area_aid_ha !== undefined
+                ? saipPopupRow(
+                    'Área AID informada',
+                    formatSaipArea(p.area_aid_ha) + ' ha'
+                )
+                : ''
+        ) +
+
+        saipPopupRow(
+            'Data do protocolo',
+            formatSaipDate(p.data_protocolo)
+        ) +
+
+        saipPopupRow(
+            'Data do TRE',
+            formatSaipDate(p.data_tre)
+        ) +
+
+        saipPopupRow(
+            'Bens tombados/valorados',
+            p.bens_tombados_valorados
+        ) +
+
+        saipPopupRow(
+            'Bens registrados',
+            p.bens_registrados
+        ) +
+
+        saipPopupRow(
+            'Rol do art. 4º',
+            p.rol_art_4
+        ) +
+
+        saipPopupRow('Observações', p.obs) +
+
+        '<div style="margin-top:8px;font-size:10px;color:#666;">' +
+        '<span style="color:#d32f2f;">■</span> ADA' +
+        '&nbsp;&nbsp;' +
+        '<span style="color:#1565c0;">■</span> AID' +
+        '</div>' +
+
+        '<button onclick="clearIphanHighlight()" style="margin-top:8px;background:#e65100;color:white;border:none;border-radius:4px;padding:5px 9px;font-size:10px;cursor:pointer;">' +
+        'Remover destaque' +
+        '</button>' +
+
+        '</div>';
+
+    var centro = limites.isValid()
+        ? limites.getCenter()
+        : map.getCenter();
+
+    L.popup({
+        maxWidth: 340,
+        maxHeight: 420,
+        autoPan: true
+    })
+        .setLatLng(centro)
+        .setContent(html)
+        .openOn(map);
+}
+
 // ===== Ir para feição IPHAN (zoom + destaque + popup) =====
 var _iphanHighlight = null;
-function renderMixedResults(nominatimRes, iphanRes, empreendimentosRes) {
+function renderMixedResults(nominatimRes, iphanRes, empreendimentosRes, saipRes) {
     var box = document.getElementById('searchResults');
     box.innerHTML = '';
 
     var total = (nominatimRes ? nominatimRes.length : 0) +
                 (iphanRes ? iphanRes.length : 0) +
-                (empreendimentosRes ? empreendimentosRes.length : 0);
+                (empreendimentosRes ? empreendimentosRes.length : 0) +
+                (saipRes ? saipRes.length : 0);
 
     if (total === 0) {
         box.innerHTML = '<div style="padding:10px;color:#999;font-size:11px;">Nenhum resultado encontrado.</div>';
@@ -1054,6 +1509,62 @@ function renderMixedResults(nominatimRes, iphanRes, empreendimentosRes) {
                 (uf ? ' • ' + uf : '') +
                 (processo ? ' • SEI ' + processo : '') + '</div>';
             div.onclick = function() { goToEmpreendimento(f); box.style.display = 'none'; };
+            box.appendChild(div);
+        });
+    }
+
+    // ===== EMPREENDIMENTOS SAIP =====
+    if (saipRes && saipRes.length) {
+        saipRes.sort(function(a, b) {
+            var nomeA = a.properties.nome_empreendimento || '';
+            var nomeB = b.properties.nome_empreendimento || '';
+            return nomeA.localeCompare(nomeB, 'pt-BR');
+        });
+
+        var hdrSaip = document.createElement('div');
+        hdrSaip.style.cssText = 'padding:5px 10px;background:#fff3e0;font-size:10px;font-weight:700;color:#e65100;border-bottom:1px solid #ffcc80;';
+        hdrSaip.textContent = 'EMPREENDIMENTOS SAIP - ' + saipRes.length;
+        box.appendChild(hdrSaip);
+
+        saipRes.slice(0, 30).forEach(function(item) {
+            var p = item.properties || {};
+            var nome = p.nome_empreendimento || 'Empreendimento sem nome';
+            var idSaip = p.id_saip || '';
+            var processo = p.processo || '';
+            var tipo = p.tipo_empreendimento || '';
+            var municipio = p.municipio || '';
+            var uf = p.uf || '';
+            var areas = [];
+
+            if (item.adaFeatures && item.adaFeatures.length) {
+                areas.push('ADA');
+            }
+
+            if (item.aidFeatures && item.aidFeatures.length) {
+                areas.push('AID');
+            }
+
+            var div = document.createElement('div');
+            div.className = 'search-result-item';
+
+            div.innerHTML =
+                '<div style="font-weight:600;font-size:12px;color:#222;">🏗️ ' + nome + '</div>' +
+                '<div style="font-size:10px;color:#666;">' +
+                    (idSaip ? 'ID SAIP ' + idSaip : '') +
+                    (processo ? (idSaip ? ' • ' : '') + 'SEI ' + processo : '') +
+                '</div>' +
+                '<div style="font-size:10px;color:#666;">' +
+                    tipo +
+                    (municipio ? (tipo ? ' • ' : '') + municipio : '') +
+                    (uf ? '/' + uf : '') +
+                    (areas.length ? ' • ' + areas.join(' + ') : '') +
+                '</div>';
+
+            div.onclick = function() {
+                goToSaipFeature(item);
+                box.style.display = 'none';
+            };
+
             box.appendChild(div);
         });
     }
@@ -1185,7 +1696,7 @@ function goToCoords(lat, lng) {
 				if (btn) btn.classList.add('follow-paused');
 			}
 		});
-		console.log('[VpGeo v1.5] Proxy: ' + (useProxy ? 'ATIVO (HTTPS)' : 'DESATIVADO (local)'));
+		console.log('[VpGeo v1.6] Proxy: ' + (useProxy ? 'ATIVO (HTTPS)' : 'DESATIVADO (local)'));
 
 	</script>
     <script>
