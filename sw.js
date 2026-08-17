@@ -1,5 +1,5 @@
-// Service Worker — VpGeo v1.6
-const CACHE_NAME = 'vpgeo-v1.6';
+// Service Worker — VpGeo v1.7
+const CACHE_NAME = 'vpgeo-v1.7';
 
 // Recursos essenciais para cache (app shell)
 const APP_SHELL = [
