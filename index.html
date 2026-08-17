@@ -301,7 +301,7 @@
             { title: 'Bens Materiais \u2014 Pol\u00edgonos', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:bem_poligono' },
             { title: 'Hidrografia', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_hidrografia' },
             { title: 'Empreendimentos (FCA)', url: WMS_DBGEO_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=Empreendimentos' },
-            { title: 'Geossítios — GeoSIT/SGB', url: '', fillColor: 'rgba(255,193,7,0.75)', borderColor: '#7a4f00', description: 'Pontos do inventário GeoSIT/SGB' },
+            { title: 'Geossítios — GEOSSIT/SGB', url: '', fillColor: 'rgba(255,193,7,0.75)', borderColor: '#7a4f00', description: 'Pontos do inventário GEOSSIT/SGB' },
 			{ title: 'Bens Imateriais (BCR)', url: '' },
 			{ title: 'Área Diretamente Afetada (ADA) — SAIP', url: '', fillColor: 'rgba(211,47,47,0.25)', borderColor: '#d32f2f', description: 'ADA — polígono SAIP' },
 			{ title: 'Área de Influência Direta (AID) — SAIP', url: '', fillColor: 'rgba(66,165,245,0.15)', borderColor: '#1565c0', description: 'AID — polígono SAIP' }
@@ -413,7 +413,7 @@
             }
         );
 
-        // === GEOSSÍTIOS (GeoSIT / SGB) ===
+        // === GEOSSÍTIOS (GEOSSIT / SGB) ===
         var geossitiosLayer = L.layerGroup();
         var geossitiosGeoLayer = null;
 		var geossitiosSearchFeatures = [];
@@ -477,7 +477,7 @@
                             '</div>' +
 
                             (id
-                                ? '<div><b>ID GeoSIT:</b> ' +
+                                ? '<div><b>ID GEOSSIT:</b> ' +
                                   escapeGeossitHtml(id) +
                                   '</div>'
                                 : '') +
@@ -524,10 +524,10 @@
 
                             (link
                                 ? '<a href="' + escapeGeossitHtml(link) +
-                        '" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:8px;padding:5px 10px;background:#7a4f00;color:white;border-radius:4px;font-size:10px;text-decoration:none;">Abrir no GeoSIT</a>'
+                        '" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:8px;padding:5px 10px;background:#7a4f00;color:white;border-radius:4px;font-size:10px;text-decoration:none;">Abrir no GEOSSIT</a>'
                                 : '') +
 
-                            '<div style="margin-top:7px;font-size:9px;color:#777;">Fonte: GeoSIT / Serviço Geológico do Brasil</div>' +
+                            '<div style="margin-top:7px;font-size:9px;color:#777;">Fonte: GEOSSIT / Serviço Geológico do Brasil</div>' +
 
                             '</div>';
 
@@ -605,7 +605,7 @@
             { "Rotulos": esriLabels,
               "Sitios (pontos)": sitP, "Sitios (poligonos)": sitPol,
               "Bens Materiais": benM, "Bens Mat. (pol.)": benPol,
-			  "Geossítios — GeoSIT/SGB": geossitiosLayer,
+			  "Geossítios — GEOSSIT/SGB": geossitiosLayer,
               "Bens Imateriais (BCR)": bensImatLayer,
               "Pre Setor": preSt,
               "Hidrografia": hidro, "Nimuendaju 2017": nim17,
@@ -1785,7 +1785,7 @@ function renderMixedResults(nominatimRes, iphanRes, empreendimentosRes, saipRes,
             'border-bottom:1px solid #ffd54f;';
 
         hdrGeossitios.textContent =
-            'GEOSSÍTIOS — GEOSIT/SGB - ' +
+            'GEOSSÍTIOS — GEOSSIT/SGB - ' +
             geossitiosRes.length;
 
         box.appendChild(hdrGeossitios);
@@ -1829,7 +1829,7 @@ function renderMixedResults(nominatimRes, iphanRes, empreendimentosRes, saipRes,
                     'color:#666;' +
                 '">' +
                     (id
-                        ? 'ID GeoSIT ' +
+                        ? 'ID GEOSSIT ' +
                           escapeGeossitHtml(id)
                         : '') +
 
