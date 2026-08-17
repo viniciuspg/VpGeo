@@ -158,14 +158,14 @@
     <div class="header">
         <h1>VpGeo — Patrimônio Cultural Brasileiro</h1>
         <div class="badges">
-            <span class="badge badge-v">v1.6</span>
+            <span class="badge badge-v">v1.7</span>
             <span class="badge badge-proto">Prot&#243;tipo</span>
         </div>
     </div>
     <div class="info-bar">
         <div class="info-left">
             <span class="wms-status"><span class="status-dot"></span> WMS: geoserver.iphan.gov.br</span>
-            <span class="wms-status"><span class="status-dot"></span> 11 camadas + Bens Imateriais (BCR) | Clique no mapa para consultar</span>
+            <span class="wms-status"><span class="status-dot"></span> 11 camadas WMS + Bens Imateriais (BCR) + Geossítios (GEOSSIT) | Clique no mapa para consultar</span>
         </div>
         <div class="coords" id="coords">Lat: -15.0000 | Lng: -50.0000 | Zoom: 5</div>
     </div>
@@ -217,10 +217,11 @@
 					  <li><strong>Codigo IPHAN</strong> com ou sem hifens (ex: <em>SC-4208807-BA-ST-00008</em> ou <em>SC4208807BAST00008</em>)</li>
 					  <li><strong>Empreendimento FCA</strong> por nome, razao social, ID ou processo SEI (exemplos ficticios: <em>UHE Rio Fictício</em>, <em>99999</em> ou <em>01000.000000/0000-00</em>)</li>
 					  <li><strong>Empreendimento SAIP</strong> por nome, ID SAIP, processo SEI, tipo ou municipio (exemplos ficticios: <em>PCH Rio Exemplo</em>, <em>999/2099</em> ou <em>01000.000000/2099-00</em>). Quando disponíveis, ADA e AID são reunidas em um único resultado.</li>
+					  <li><strong>Geossítios (GEOSSIT)</strong> por nome, ID, município, UF, classificação, temática, domínio geológico, período geológico ou geoparque (exemplos fictícios: <em>Geossítio Serra Exemplo</em>, <em>9999</em> ou <em>Geomorfologia</em>).</li>
 					  <li><strong>Endereco ou cidade</strong> (ex: <em>Florianopolis</em>)</li>
 					  <li><strong>Coordenadas</strong> (ex: <em>-27.57, -48.52</em>)</li>
 					</ul>
-					<p style="margin-top:4px;">Pressione Enter. Os resultados sao exibidos em secoes separadas: <strong>Sitios e Bens (IPHAN)</strong>, <strong>Empreendimentos FCA (IPHAN)</strong>, <strong>Empreendimentos SAIP</strong> e <strong>Locais (OpenStreetMap)</strong>.</p>
+					<p style="margin-top:4px;">Pressione Enter. Os resultados sao exibidos em secoes separadas: <strong>Sitios e Bens (IPHAN)</strong>, <strong>Geossítios (GEOSSIT/SGB)</strong>, <strong>Empreendimentos FCA (IPHAN)</strong>, <strong>Empreendimentos SAIP</strong> e <strong>Locais (OpenStreetMap)</strong>.</p>
 				</div>
                 <hr class="guia-divider">
                 <div class="guia-section">
@@ -238,12 +239,12 @@
                 <hr class="guia-divider">
                 <div class="guia-section">
                     <h3>&#128203; Camadas</h3>
-                    <p>Clique no icone de camadas (canto superior direito) para trocar o mapa base (Satelite, OSM, Topografico, Ruas, GMRT) e ativar/desativar camadas tematicas: sitios arqueologicos, bens materiais, bens imateriais (BCR), empreendimentos FCA, Área Diretamente Afetada (ADA) do SAIP, Área de Influência Direta (AID) do SAIP e mais.</p>
+                    <p>Clique no icone de camadas (canto superior direito) para trocar o mapa base (Satelite, OSM, Topografico, Ruas, GMRT) e ativar/desativar camadas tematicas: sitios arqueologicos, geossítios (GEOSSIT), bens materiais, bens imateriais (BCR), empreendimentos FCA, Área Diretamente Afetada (ADA) do SAIP, Área de Influência Direta (AID) do SAIP e mais.</p>
                 </div>
                 <hr class="guia-divider">
                 <div class="guia-section">
                     <h3>&#128070; Consultar Feicoes</h3>
-                    <p>Clique em qualquer ponto do mapa para consultar feicoes: sitios arqueologicos, bens materiais, empreendimentos FCA e áreas ADA/AID do SAIP. Um popup mostrara os dados encontrados. Para bens imateriais, todos os poligonos sobrepostos serao listados.</p>
+                    <p>Clique em qualquer ponto do mapa para consultar feicoes: sitios arqueologicos, geossítios (GEOSSIT), bens materiais, empreendimentos FCA e áreas ADA/AID do SAIP. Um popup mostrara os dados encontrados. Para bens imateriais, todos os poligonos sobrepostos serao listados.</p>
                 </div>
                 <hr class="guia-divider">
                 <div class="guia-section">
@@ -259,11 +260,11 @@
                 <div class="guia-section">
                     <h3>&#9432; Sobre o VpGeo</h3>
                     <p>O <strong>VpGeo — Visualizador Geoespacial do Patrimônio Cultural Brasileiro</strong> é um aplicativo gratuito e de código aberto para consulta do patrimônio cultural acautelado em âmbito federal pelo IPHAN. Desenvolvido por <strong>Vinicius Paiva Gonçalves</strong>.</p>
-                    <p style="margin-top:4px;">Dados WMS: <a href="https://geoserver.iphan.gov.br" target="_blank">GeoServer IPHAN</a> | Bens Imateriais: <a href="https://bcr.iphan.gov.br" target="_blank">BCR/IPHAN</a></p>
+                    <p style="margin-top:4px;">Dados WMS: <a href="https://geoserver.iphan.gov.br" target="_blank" rel="noopener noreferrer">GeoServer IPHAN</a> | Bens Imateriais: <a href="https://bcr.iphan.gov.br" target="_blank" rel="noopener noreferrer">BCR/IPHAN</a> | Geossítios: <a href="https://sgb.gov.br/geossit/" target="_blank" rel="noopener noreferrer">GEOSSIT/SGB</a></p>
                 </div>
             </div>
             <div class="guia-footer">
-                VpGeo v7.9 &mdash; <a href="https://github.com/viniciuspg/VpGeo" target="_blank">GitHub</a> | <a href="privacy.html" target="_blank">Privacidade</a>
+                VpGeo v1.7 &mdash; <a href="https://github.com/viniciuspg/VpGeo" target="_blank">GitHub</a> | <a href="privacy.html" target="_blank">Privacidade</a>
             </div>
         </div>
     </div>
@@ -300,7 +301,8 @@
             { title: 'Bens Materiais \u2014 Pol\u00edgonos', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:bem_poligono' },
             { title: 'Hidrografia', url: WMS_SICG_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=SICG:tg_hidrografia' },
             { title: 'Empreendimentos (FCA)', url: WMS_DBGEO_RAW + '?request=GetLegendGraphic&format=image/png&width=20&height=20&layer=Empreendimentos' },
-            { title: 'Bens Imateriais (BCR)', url: '' },
+            { title: 'Geossítios — GeoSIT/SGB', url: '', fillColor: 'rgba(255,193,7,0.75)', borderColor: '#7a4f00', description: 'Pontos do inventário GeoSIT/SGB' },
+			{ title: 'Bens Imateriais (BCR)', url: '' },
 			{ title: 'Área Diretamente Afetada (ADA) — SAIP', url: '', fillColor: 'rgba(211,47,47,0.25)', borderColor: '#d32f2f', description: 'ADA — polígono SAIP' },
 			{ title: 'Área de Influência Direta (AID) — SAIP', url: '', fillColor: 'rgba(66,165,245,0.15)', borderColor: '#1565c0', description: 'AID — polígono SAIP' }
         ];
@@ -411,6 +413,143 @@
             }
         );
 
+        // === GEOSSÍTIOS (GeoSIT / SGB) ===
+        var geossitiosLayer = L.layerGroup();
+        var geossitiosGeoLayer = null;
+		var geossitiosSearchFeatures = [];
+		        
+		function escapeGeossitHtml(value) {
+            return String(value === null || value === undefined ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        fetch('data/geossitios.geojson')
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
+
+                return response.json();
+            })
+            .then(function(data) {
+			    geossitiosSearchFeatures = data.features || [];
+				
+                geossitiosGeoLayer = L.geoJSON(data, {
+                    pointToLayer: function(feature, latlng) {
+                        return L.circleMarker(latlng, {
+                            radius: 6,
+                            color: '#7a4f00',
+                            weight: 2,
+                            opacity: 0.9,
+                            fillColor: '#ffc107',
+                            fillOpacity: 0.75
+                        });
+                    },
+
+                    onEachFeature: function(feature, layer) {
+                        var p = feature.properties || {};
+
+                        var nome = p['Nome Geossítio'] || 'Geossítio';
+                        var id = p.ID || '';
+                        var cidade = p.Cidade || '';
+                        var uf = p.UF || '';
+                        var classificacao = p['Class. Geossitio'] || '';
+                        var tematica = p['Class. Temática'] || '';
+                        var dominio = p['Dom. Geológico'] || '';
+                        var periodo = p['Período Geológico'] || '';
+                        var status = p.Status || '';
+                        var link = p.link_geossit || '';
+                        var ajustada = p.coordenada_ajustada === true;
+
+                        var municipioUf = [cidade, uf]
+                            .filter(Boolean)
+                            .join('/');
+
+                        var html =
+                            '<div style="font-size:12px;max-width:300px;">' +
+
+                            '<div style="font-weight:700;font-size:13px;color:#7a4f00;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid #ddd;">' +
+                                escapeGeossitHtml(nome) +
+                            '</div>' +
+
+                            (id
+                                ? '<div><b>ID GeoSIT:</b> ' +
+                                  escapeGeossitHtml(id) +
+                                  '</div>'
+                                : '') +
+
+                            (municipioUf
+                                ? '<div><b>Município/UF:</b> ' +
+                                  escapeGeossitHtml(municipioUf) +
+                                  '</div>'
+                                : '') +
+
+                            (classificacao
+                                ? '<div><b>Classificação:</b> ' +
+                                  escapeGeossitHtml(classificacao) +
+                                  '</div>'
+                                : '') +
+
+                            (tematica
+                                ? '<div><b>Temática:</b> ' +
+                                  escapeGeossitHtml(tematica) +
+                                  '</div>'
+                                : '') +
+
+                            (dominio
+                                ? '<div><b>Domínio geológico:</b> ' +
+                                  escapeGeossitHtml(dominio) +
+                                  '</div>'
+                                : '') +
+
+                            (periodo
+                                ? '<div><b>Período geológico:</b> ' +
+                                  escapeGeossitHtml(periodo) +
+                                  '</div>'
+                                : '') +
+
+                            (status
+                                ? '<div><b>Status:</b> ' +
+                                  escapeGeossitHtml(status) +
+                                  '</div>'
+                                : '') +
+
+                            (ajustada
+                                ? '<div style="margin-top:6px;padding:4px 6px;background:#fff3e0;border-left:3px solid #e65100;font-size:10px;">Coordenada ajustada no VpGeo, com preservação da coordenada original.</div>'
+                                : '') +
+
+                            (link
+                                ? '<a href="' + escapeGeossitHtml(link) +
+                        '" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:8px;padding:5px 10px;background:#7a4f00;color:white;border-radius:4px;font-size:10px;text-decoration:none;">Abrir no GeoSIT</a>'
+                                : '') +
+
+                            '<div style="margin-top:7px;font-size:9px;color:#777;">Fonte: GeoSIT / Serviço Geológico do Brasil</div>' +
+
+                            '</div>';
+
+                        layer.bindPopup(html, {
+                            maxWidth: 330,
+                            maxHeight: 400
+                        });
+                    }
+                }).addTo(geossitiosLayer);
+
+                console.log(
+                    '[VpGeo] Geossítios carregados:',
+                    data.features ? data.features.length : 0
+                );
+            })
+            .catch(function(error) {
+                console.log(
+                    '[VpGeo] Erro ao carregar geossítios:',
+                    error
+                );
+            });
+
 		// === BENS IMATERIAIS (BCR) ===
         var bensImatStyle = { fillColor: '#89B1FF', fillOpacity: 0.3, color: '#5a7fbf', weight: 1, opacity: 0.6 };
         var bensImatLayer = L.layerGroup();
@@ -466,6 +605,7 @@
             { "Rotulos": esriLabels,
               "Sitios (pontos)": sitP, "Sitios (poligonos)": sitPol,
               "Bens Materiais": benM, "Bens Mat. (pol.)": benPol,
+			  "Geossítios — GeoSIT/SGB": geossitiosLayer,
               "Bens Imateriais (BCR)": bensImatLayer,
               "Pre Setor": preSt,
               "Hidrografia": hidro, "Nimuendaju 2017": nim17,
@@ -928,20 +1068,24 @@ function fallbackCopyGfi(text, callback) {
 		searchNominatim(q).catch(function() { return []; }),
 		searchIphan(q).catch(function() { return []; }),
 		searchEmpreendimentos(q).catch(function() { return []; }),
-		searchSaip(q).catch(function() { return []; })
+		searchSaip(q).catch(function() { return []; }),
+		searchGeossitios(q).catch(function() { return []; })
 	]).then(function(results) {
 		var nominatimRes = results[0];
 		var iphanRes = results[1];
 		var empreendimentosRes = results[2];
 		var saipRes = results[3];
+		var geossitiosRes = results[4];
 
 		renderMixedResults(
 			nominatimRes,
 			iphanRes,
 			empreendimentosRes,
-			saipRes
+			saipRes,
+			geossitiosRes
 		);
 	});
+
 }
 
 // ===== Busca Nominatim (endereços) =====
@@ -1047,6 +1191,58 @@ function searchEmpreendimentos(term) {
     return fetch(url).then(function(r) { return r.json(); }).then(function(gj) {
         return gj.features || [];
     }).catch(function() { return []; });
+}
+
+// ===== Busca local de Geossítios =====
+function searchGeossitios(term) {
+    var termo = String(term || '')
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
+    if (!termo || !geossitiosSearchFeatures.length) {
+        return Promise.resolve([]);
+    }
+
+    var resultados = geossitiosSearchFeatures.filter(function(feature) {
+        var p = feature.properties || {};
+
+        var campos = [
+            p.ID,
+            p['Nome Geossítio'],
+            p.Cidade,
+            p.UF,
+            p['Class. Geossitio'],
+            p['Class. Temática'],
+            p['Class. Temática Sec.'],
+            p['Dom. Geológico'],
+            p['Período Geológico'],
+            p['Nome do Geoparque']
+        ];
+
+        return campos.some(function(valor) {
+            return String(valor || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .indexOf(termo) !== -1;
+        });
+    });
+
+    resultados.sort(function(a, b) {
+        var nomeA = String(
+            (a.properties || {})['Nome Geossítio'] || ''
+        );
+
+        var nomeB = String(
+            (b.properties || {})['Nome Geossítio'] || ''
+        );
+
+        return nomeA.localeCompare(nomeB, 'pt-BR');
+    });
+
+    return Promise.resolve(resultados.slice(0, 30));
 }
 
 // ===== Busca de Empreendimentos SAIP: ADA + AID =====
@@ -1290,6 +1486,68 @@ function goToEmpreendimento(feature) {
     if (b.isValid()) map.fitBounds(b, { maxZoom: 15 });
 }
 
+// ===== Ir para Geossítio =====
+function goToGeossitio(feature) {
+    if (!feature || !feature.geometry) {
+        return;
+    }
+
+    if (!map.hasLayer(geossitiosLayer)) {
+        geossitiosLayer.addTo(map);
+    }
+
+    var properties = feature.properties || {};
+    var idGeossitio = String(properties.ID || '');
+    var camadaEncontrada = null;
+
+    if (geossitiosGeoLayer) {
+        geossitiosGeoLayer.eachLayer(function(layer) {
+            var layerProperties =
+                layer.feature &&
+                layer.feature.properties
+                    ? layer.feature.properties
+                    : {};
+
+            if (
+                String(layerProperties.ID || '') ===
+                idGeossitio
+            ) {
+                camadaEncontrada = layer;
+            }
+        });
+    }
+
+    if (
+        camadaEncontrada &&
+        camadaEncontrada.getLatLng
+    ) {
+        map.setView(
+            camadaEncontrada.getLatLng(),
+            14
+        );
+
+        camadaEncontrada.openPopup();
+        return;
+    }
+
+    var coordinates = feature.geometry.coordinates || [];
+
+    if (coordinates.length >= 2) {
+        var longitude = Number(coordinates[0]);
+        var latitude = Number(coordinates[1]);
+
+        if (
+            isFinite(latitude) &&
+            isFinite(longitude)
+        ) {
+            map.setView(
+                [latitude, longitude],
+                14
+            );
+        }
+    }
+}
+
 // ===== Ir para Empreendimento SAIP: ADA + AID =====
 function goToSaipFeature(item) {
     if (_iphanHighlight) {
@@ -1439,14 +1697,15 @@ function goToSaipFeature(item) {
 
 // ===== Ir para feição IPHAN (zoom + destaque + popup) =====
 var _iphanHighlight = null;
-function renderMixedResults(nominatimRes, iphanRes, empreendimentosRes, saipRes) {
+function renderMixedResults(nominatimRes, iphanRes, empreendimentosRes, saipRes, geossitiosRes) {
     var box = document.getElementById('searchResults');
     box.innerHTML = '';
 
     var total = (nominatimRes ? nominatimRes.length : 0) +
                 (iphanRes ? iphanRes.length : 0) +
                 (empreendimentosRes ? empreendimentosRes.length : 0) +
-                (saipRes ? saipRes.length : 0);
+                (saipRes ? saipRes.length : 0) +
+                (geossitiosRes ? geossitiosRes.length : 0);
 
     if (total === 0) {
         box.innerHTML = '<div style="padding:10px;color:#999;font-size:11px;">Nenhum resultado encontrado.</div>';
@@ -1509,6 +1768,98 @@ function renderMixedResults(nominatimRes, iphanRes, empreendimentosRes, saipRes)
                 (uf ? ' • ' + uf : '') +
                 (processo ? ' • SEI ' + processo : '') + '</div>';
             div.onclick = function() { goToEmpreendimento(f); box.style.display = 'none'; };
+            box.appendChild(div);
+        });
+    }
+
+    // ===== GEOSSÍTIOS =====
+    if (geossitiosRes && geossitiosRes.length) {
+        var hdrGeossitios = document.createElement('div');
+
+        hdrGeossitios.style.cssText =
+            'padding:5px 10px;' +
+            'background:#fff8e1;' +
+            'font-size:10px;' +
+            'font-weight:700;' +
+            'color:#7a4f00;' +
+            'border-bottom:1px solid #ffd54f;';
+
+        hdrGeossitios.textContent =
+            'GEOSSÍTIOS — GEOSIT/SGB - ' +
+            geossitiosRes.length;
+
+        box.appendChild(hdrGeossitios);
+
+        geossitiosRes.forEach(function(feature) {
+            var p = feature.properties || {};
+
+            var nome =
+                p['Nome Geossítio'] ||
+                'Geossítio sem nome';
+
+            var id = p.ID || '';
+            var cidade = p.Cidade || '';
+            var uf = p.UF || '';
+            var classificacao =
+                p['Class. Geossitio'] || '';
+            var tematica =
+                p['Class. Temática'] || '';
+            var ajustada =
+                p.coordenada_ajustada === true;
+
+            var municipioUf = [cidade, uf]
+                .filter(Boolean)
+                .join('/');
+
+            var div = document.createElement('div');
+            div.className = 'search-result-item';
+
+            div.innerHTML =
+                '<div style="' +
+                    'font-weight:600;' +
+                    'font-size:12px;' +
+                    'color:#222;' +
+                '">' +
+                    '🟡 ' +
+                    escapeGeossitHtml(nome) +
+                '</div>' +
+
+                '<div style="' +
+                    'font-size:10px;' +
+                    'color:#666;' +
+                '">' +
+                    (id
+                        ? 'ID GeoSIT ' +
+                          escapeGeossitHtml(id)
+                        : '') +
+
+                    (municipioUf
+                        ? (id ? ' • ' : '') +
+                          escapeGeossitHtml(municipioUf)
+                        : '') +
+                '</div>' +
+
+                '<div style="' +
+                    'font-size:10px;' +
+                    'color:#666;' +
+                '">' +
+                    escapeGeossitHtml(classificacao) +
+
+                    (tematica
+                        ? (classificacao ? ' • ' : '') +
+                          escapeGeossitHtml(tematica)
+                        : '') +
+
+                    (ajustada
+                        ? ' • Coordenada ajustada'
+                        : '') +
+                '</div>';
+
+            div.onclick = function() {
+                goToGeossitio(feature);
+                box.style.display = 'none';
+            };
+
             box.appendChild(div);
         });
     }
@@ -1696,7 +2047,7 @@ function goToCoords(lat, lng) {
 				if (btn) btn.classList.add('follow-paused');
 			}
 		});
-		console.log('[VpGeo v1.6] Proxy: ' + (useProxy ? 'ATIVO (HTTPS)' : 'DESATIVADO (local)'));
+		console.log('[VpGeo v1.7] Proxy: ' + (useProxy ? 'ATIVO (HTTPS)' : 'DESATIVADO (local)'));
 
 	</script>
     <script>
